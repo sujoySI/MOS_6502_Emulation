@@ -7,6 +7,7 @@
 using UI8 = uint8_t;
 using UI16 = uint16_t;
 using UI32 = uint32_t;
+using SI32 = int32_t;
 
 union FLAG {
     UI8 Flags;
@@ -30,7 +31,7 @@ struct MEMORY {
     void Initialise();
 
     //Write 2 Bytes
-    void WriteUI16(UI32 &cycles, const UI16 value, const UI32 address);
+    void WriteUI16(SI32 &cycles, const UI16 value, const UI32 address);
 };
 
 struct CPU {
@@ -42,19 +43,24 @@ struct CPU {
     FLAG SF; //Status Flag Register
     void Reset(MEMORY &memory);
 
-    UI8 FetchUI8(UI32 &cycles, const MEMORY &memory);
+    UI8 FetchUI8(SI32 &cycles, const MEMORY &memory);
 
-    UI16 FetchUI16(UI32 &cycles, const MEMORY &memory);
+    UI16 FetchUI16(SI32 &cycles, const MEMORY &memory);
 
 
     //OPCODES
     static constexpr UI8 INS_LDA_IM = 0xA9;
     static constexpr UI8 INS_LDA_ZP = 0xA5;
     static constexpr UI8 INS_LDA_ZPX = 0xB5;
+    static constexpr UI8 INS_LDA_ABS = 0xAD;
+    static constexpr UI8 INS_LDA_ABSX = 0xBD;
+    static constexpr UI8 INS_LDA_ABSY = 0xB9;
+    static constexpr UI8 INS_LDA_INDX = 0xA1;
+    static constexpr UI8 INS_LDA_INDY = 0xB1;
     static constexpr UI8 INS_JSR = 0x20;
 
     //Status
     void LDASetStatus();
 
-    [[nodiscard]] UI32 Execute(UI32 cycles, MEMORY &memory);
+    [[nodiscard]] SI32 Execute(SI32 cycles, MEMORY &memory);
 };
