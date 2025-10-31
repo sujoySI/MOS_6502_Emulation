@@ -3,13 +3,19 @@
 #include <cstring>
 #include <iostream>
 
+namespace m6502 {
+    using UI8 = uint8_t;
+    using UI16 = uint16_t;
+    using UI32 = uint32_t;
+    using SI32 = int32_t;
 
-using UI8 = uint8_t;
-using UI16 = uint16_t;
-using UI32 = uint32_t;
-using SI32 = int32_t;
+    union FLAG;
 
-union FLAG {
+    struct MEMORY;
+    struct CPU;
+}
+
+union m6502::FLAG {
     UI8 Flags;
 
     struct {
@@ -24,7 +30,7 @@ union FLAG {
     };
 };
 
-struct MEMORY {
+struct m6502::MEMORY {
     static constexpr UI32 MAX_MEM = 1024 * 64;
     UI8 Data[MAX_MEM];
 
@@ -34,7 +40,7 @@ struct MEMORY {
     void WriteUI16(SI32 &cycles, const UI16 value, const UI32 address);
 };
 
-struct CPU {
+struct m6502::CPU {
     UI16 PC; //Program Counter
     UI8 SP; //Stack Pointer
     UI8 A; //Accumulator or Main register
@@ -49,15 +55,30 @@ struct CPU {
 
 
     //OPCODES
-    static constexpr UI8 INS_LDA_IM = 0xA9;
-    static constexpr UI8 INS_LDA_ZP = 0xA5;
-    static constexpr UI8 INS_LDA_ZPX = 0xB5;
-    static constexpr UI8 INS_LDA_ABS = 0xAD;
-    static constexpr UI8 INS_LDA_ABSX = 0xBD;
-    static constexpr UI8 INS_LDA_ABSY = 0xB9;
-    static constexpr UI8 INS_LDA_INDX = 0xA1;
-    static constexpr UI8 INS_LDA_INDY = 0xB1;
-    static constexpr UI8 INS_JSR = 0x20;
+    static constexpr UI8
+    //LDA
+    INS_LDA_IM = 0xA9,
+    INS_LDA_ZP = 0xA5,
+    INS_LDA_ZPX = 0xB5,
+    INS_LDA_ABS = 0xAD,
+    INS_LDA_ABSX = 0xBD,
+    INS_LDA_ABSY = 0xB9,
+    INS_LDA_INDX = 0xA1,
+    INS_LDA_INDY = 0xB1,
+    //LDX
+    INS_LDX_IM = 0xA2,
+    INS_LDX_ZP = 0xA6,
+    INS_LDX_ZPY = 0xB6,
+    INS_LDX_ABS = 0xAE,
+    INS_LDX_ABSY = 0xBE,
+    //LDY
+    INS_LDY_IM = 0xA0,
+    INS_LDY_ZP = 0xA4,
+    INS_LDY_ZPX = 0xB4,
+    INS_LDY_ABS = 0xAC,
+    INS_LDY_ABSX = 0xBC,
+    //JSR
+    INS_JSR = 0x20;
 
     //Status
     void LDASetStatus();
