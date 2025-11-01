@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <cstring>
 #include <iostream>
 
 namespace m6502 {
@@ -24,7 +23,7 @@ union m6502::FLAG {
         UI8 I: 1; //Interrupt Flag
         UI8 D: 1; //Decimal Flag
         UI8 B: 1; //Break Flag (Only for Stack Values)
-        UI8 :  1; //Reserved
+        UI8 RU:1; //Reserved
         UI8 V: 1; //Overflow Flag
         UI8 N: 1; //Negative Flag     //MSB
     };
@@ -37,7 +36,7 @@ struct m6502::MEMORY {
     void Initialise();
 
     //Write 2 Bytes
-    void WriteUI16(SI32 &cycles, const UI16 value, const UI32 address);
+    void WriteUI16(SI32 &cycles, UI16 value, UI32 address);
 };
 
 struct m6502::CPU {
@@ -81,7 +80,14 @@ struct m6502::CPU {
     INS_JSR = 0x20;
 
     //Status
-    void LDASetStatus();
+    void LoadRegistersSetStatus(UI8 Register);
 
     [[nodiscard]] SI32 Execute(SI32 cycles, MEMORY &memory);
+
+    UI16 AddrZeroPage(SI32 &cycles, const MEMORY &memory);
+    UI16 AddrZeroPageX(SI32 &cycles, const MEMORY &memory);
+    UI16 AddrZeroPageY(SI32 &cycles, const MEMORY &memory);
+    UI16 AddrAbsolute(SI32 &cycles, const MEMORY &memory);
+    UI16 AddrAbsoluteX(SI32 &cycles, const MEMORY &memory);
+    UI16 AddrAbsoluteY(SI32 &cycles, const MEMORY &memory);
 };
