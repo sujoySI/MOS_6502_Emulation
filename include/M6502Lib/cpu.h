@@ -15,7 +15,7 @@ namespace m6502 {
 }
 
 union m6502::FLAG {
-    UI8 Flags;
+    UI8 All;
 
     struct {
         UI8 C: 1; //Carryover Flag    //LSB
@@ -42,7 +42,7 @@ struct m6502::CPU {
     UI8 A; //Accumulator or Main register
     UI8 X; //Index register X
     UI8 Y; //Index register Y
-    FLAG SF; //Status Flag Register
+    FLAG PSF; //Processor Status Flag Register
     void Reset(UI16 ResetVector, MEMORY &memory);
 
     static UI8 ReadUI8(SI32 &cycles, UI16 address, const MEMORY &memory);
@@ -63,11 +63,27 @@ struct m6502::CPU {
         SP -= 2;
     }
 
+    void PushUI8toStack(SI32 &cycles, UI8 value, MEMORY &memory) {
+        const UI16 SPword = SPtoAddress();
+        memory.Data[SPword] = value;
+        --cycles;
+        --SP;
+        --cycles;
+    }
+
     UI16 PopAddressFromStack(SI32 &cycles, const MEMORY &memory) {
         const UI16 ValueFromStack = ReadUI16(cycles, SPtoAddress() + 1, memory);
         SP +=2;
         --cycles;
         return ValueFromStack;
+    }
+
+    UI8 PopUI8fromStack(SI32 &cycles, MEMORY &memory) {
+        ++SP;
+        const UI16 SPword = SPtoAddress();
+        const UI8 value = memory.Data[SPword];
+        cycles -= 3;
+        return value;
     }
 
     //OPCODES
@@ -93,6 +109,7 @@ struct m6502::CPU {
     INS_LDY_ZPX = 0xB4,
     INS_LDY_ABS = 0xAC,
     INS_LDY_ABSX = 0xBC,
+
     //STA aka STore A register
     INS_STA_ZP = 0x85,
     INS_STA_ZPX = 0x95,
@@ -109,6 +126,20 @@ struct m6502::CPU {
     INS_STY_ZP = 0x84,
     INS_STY_ZPX = 0x94,
     INS_STY_ABS = 0x8C,
+
+    //TSX aka Transfer SP to X
+    INS_TSX = 0xBA,
+    //TSX aka Transfer X to SP
+    INS_TXS = 0x9A,
+    //PHA aka PusH A to stack
+    INS_PHA = 0x48,
+    //PLA aka PulL from stack to A
+    INS_PLA = 0x68,
+    //PHP aka PusH PS to stack
+    INS_PHP = 0x08,
+    //PLP aka PulL from stack to PS
+    INS_PLP = 0x28,
+
     //JMP aka JuMP to an instruction
     INS_JMP_ABS = 0x4C,
     INS_JMP_IND = 0x6C,

@@ -28,11 +28,11 @@ class M6502LoadRegisterTests : public ::testing::Test {
 };
 
 static void VerifyUnmodifiedFlagsFromLoadRegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
-    EXPECT_EQ(cpu.SF.B, cpuCopy.SF.B);
-    EXPECT_EQ(cpu.SF.C, cpuCopy.SF.C);
-    EXPECT_EQ(cpu.SF.D, cpuCopy.SF.D);
-    EXPECT_EQ(cpu.SF.I, cpuCopy.SF.I);
-    EXPECT_EQ(cpu.SF.V, cpuCopy.SF.V);
+    EXPECT_EQ(cpu.PSF.B, cpuCopy.PSF.B);
+    EXPECT_EQ(cpu.PSF.C, cpuCopy.PSF.C);
+    EXPECT_EQ(cpu.PSF.D, cpuCopy.PSF.D);
+    EXPECT_EQ(cpu.PSF.I, cpuCopy.PSF.I);
+    EXPECT_EQ(cpu.PSF.V, cpuCopy.PSF.V);
 }
 
 void M6502LoadRegisterTests::TestLoadRegisterImmediate(const m6502::UI8 OpcodeToTest,  m6502::UI8 m6502::CPU::*RegisterToTest){
@@ -49,8 +49,8 @@ void M6502LoadRegisterTests::TestLoadRegisterImmediate(const m6502::UI8 OpcodeTo
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x84);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_TRUE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_TRUE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -69,8 +69,8 @@ void M6502LoadRegisterTests::TestLoadRegisterImmediateAffectsZeroFlag(const m650
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    EXPECT_TRUE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_TRUE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
 }
 
@@ -88,8 +88,8 @@ void M6502LoadRegisterTests::TestLoadRegisterZeroPage(const m6502::UI8 OpcodeToT
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -109,8 +109,8 @@ void M6502LoadRegisterTests::TestLoadRegisterZeroPageXorY(const m6502::UI8 Opcod
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -129,8 +129,8 @@ void M6502LoadRegisterTests::TestLoadRegisterZeroPageXorYWhenItWraps(const m6502
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -139,7 +139,7 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsolute(const m6502::UI8 OpcodeToT
 {
     //Given:
     using namespace m6502;
-    cpu.SF.Z = cpu.SF.N = true;
+    cpu.PSF.Z = cpu.PSF.N = true;
     ExpectedCycles = 4;
     cpu.*RegisterToLoadFrom = 5;
     mem.Data[0xFFFC] = OpcodeToTest;
@@ -153,8 +153,8 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsolute(const m6502::UI8 OpcodeToT
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -163,7 +163,7 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorY(const m6502::UI8 Opcod
 {
     //Given:
     using namespace m6502;
-    cpu.SF.Z = cpu.SF.N = true;
+    cpu.PSF.Z = cpu.PSF.N = true;
     ExpectedCycles = 4;
     cpu.*RegisterToLoadFrom = 1;
     mem.Data[0xFFFC] = OpcodeToTest;
@@ -177,8 +177,8 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorY(const m6502::UI8 Opcod
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -186,7 +186,7 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorY(const m6502::UI8 Opcod
 void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundary(const m6502::UI8 OpcodeToTest, m6502::UI8 m6502::CPU::*RegisterToTest, m6502::UI8 m6502::CPU::*RegisterToLoadFrom) {
     //Given:
     using namespace m6502;
-    cpu.SF.Z = cpu.SF.N = true;
+    cpu.PSF.Z = cpu.PSF.N = true;
     ExpectedCycles = 5;
     cpu.*RegisterToLoadFrom = 0xFF;
     mem.Data[0xFFFC] = OpcodeToTest;
@@ -200,8 +200,8 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundar
 
     //Then:
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -234,7 +234,7 @@ TEST_F(M6502LoadRegisterTests, CPU_When_LessThanRequired_CyclesIsGiven) {
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_IM) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_IM) {
     using namespace m6502;
     TestLoadRegisterImmediate(CPU::INS_LDA_IM, &CPU::A);
 }
@@ -244,50 +244,50 @@ TEST_F(M6502LoadRegisterTests, LDA_IM_AffectsZeroFlag) {
     TestLoadRegisterImmediateAffectsZeroFlag(CPU::INS_LDA_IM, &CPU::A);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ZP) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ZP) {
     using namespace m6502;
     TestLoadRegisterZeroPage(CPU::INS_LDA_ZP, &CPU::A);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ZPX) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ZPX) {
     using namespace m6502;
     TestLoadRegisterZeroPageXorY(CPU::INS_LDA_ZPX, &CPU::A, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ZPX_WhenitWraps) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ZPX_WhenitWraps) {
     using namespace m6502;
     TestLoadRegisterZeroPageXorYWhenItWraps(CPU::INS_LDA_ZPX, &CPU::A, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ABS) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ABS) {
     using namespace m6502;
     TestLoadRegisterAbsolute(CPU::INS_LDA_ABS, &CPU::A, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ABSX) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ABSX) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorY(CPU::INS_LDA_ABSX, &CPU::A, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ABSX_WhenItCrossesAPageBoundary) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ABSX_WhenItCrossesAPageBoundary) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundary(CPU::INS_LDA_ABSX, &CPU::A, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ABSY) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ABSY) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorY(CPU::INS_LDA_ABSY, &CPU::A, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_ABSY_WhenItCrossesAPageBoundary) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_ABSY_WhenItCrossesAPageBoundary) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundary(CPU::INS_LDA_ABSY, &CPU::A, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_INDX) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_INDX) {
     //Given:
     using namespace m6502;
-    cpu.SF.Z = cpu.SF.N = true;
+    cpu.PSF.Z = cpu.PSF.N = true;
     ExpectedCycles = 6;
     cpu.X = 0x04;
     mem.Data[0xFFFC] = CPU::INS_LDA_INDX;
@@ -302,16 +302,16 @@ TEST_F(M6502LoadRegisterTests, LDA_INDX) {
 
     //Then:
     EXPECT_EQ(cpu.A, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_INDY) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_INDY) {
     //Given:
     using namespace m6502;
-    cpu.SF.Z = cpu.SF.N = true;
+    cpu.PSF.Z = cpu.PSF.N = true;
     ExpectedCycles = 5;
     cpu.Y = 0x04;
     mem.Data[0xFFFC] = CPU::INS_LDA_INDY;
@@ -326,16 +326,16 @@ TEST_F(M6502LoadRegisterTests, LDA_INDY) {
 
     //Then:
     EXPECT_EQ(cpu.A, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
-TEST_F(M6502LoadRegisterTests, LDA_INDY_WhenItCrossesAPageBoundary) {
+TEST_F(M6502LoadRegisterTests, INS_LDA_INDY_WhenItCrossesAPageBoundary) {
     //Given:
     using namespace m6502;
-    cpu.SF.Z = cpu.SF.N = true;
+    cpu.PSF.Z = cpu.PSF.N = true;
     ExpectedCycles = 6;
     cpu.Y = 0xFF;
     mem.Data[0xFFFC] = CPU::INS_LDA_INDY;
@@ -350,92 +350,92 @@ TEST_F(M6502LoadRegisterTests, LDA_INDY_WhenItCrossesAPageBoundary) {
 
     //Then:
     EXPECT_EQ(cpu.A, 0x37);
-    EXPECT_FALSE(cpu.SF.Z);
-    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_FALSE(cpu.PSF.N);
     VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
 
 //LDX
-TEST_F(M6502LoadRegisterTests, LDX_IM) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_IM) {
     using namespace m6502;
     TestLoadRegisterImmediate(CPU::INS_LDX_IM, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_IM_AffectsZeroFlag) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_IM_AffectsZeroFlag) {
     using namespace m6502;
     TestLoadRegisterImmediateAffectsZeroFlag(CPU::INS_LDX_IM, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_ZP) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_ZP) {
     using namespace m6502;
     TestLoadRegisterZeroPage(CPU::INS_LDX_ZP, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_ZPY) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_ZPY) {
     using namespace m6502;
     TestLoadRegisterZeroPageXorY(CPU::INS_LDX_ZPY, &CPU::X, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_ZPY_WhenitWraps) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_ZPY_WhenitWraps) {
     using namespace m6502;
     TestLoadRegisterZeroPageXorYWhenItWraps(CPU::INS_LDX_ZPY, &CPU::X, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_ABS) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_ABS) {
     using namespace m6502;
     TestLoadRegisterAbsolute(CPU::INS_LDX_ABS, &CPU::X, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_ABSY) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_ABSY) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorY(CPU::INS_LDX_ABSY, &CPU::X, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDX_ABSY_WhenItCrossesAPageBoundary) {
+TEST_F(M6502LoadRegisterTests, INS_LDX_ABSY_WhenItCrossesAPageBoundary) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundary(CPU::INS_LDX_ABSY, &CPU::X, &CPU::Y);
 }
 
 
 //LDY
-TEST_F(M6502LoadRegisterTests, LDY_IM) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_IM) {
     using namespace m6502;
     TestLoadRegisterImmediate(CPU::INS_LDY_IM, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_IM_AffectsZeroFlag) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_IM_AffectsZeroFlag) {
     using namespace m6502;
     TestLoadRegisterImmediateAffectsZeroFlag(CPU::INS_LDY_IM, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_ZP) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_ZP) {
     using namespace m6502;
     TestLoadRegisterZeroPage(CPU::INS_LDY_ZP, &CPU::Y);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_ZPX) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_ZPX) {
     using namespace m6502;
     TestLoadRegisterZeroPageXorY(CPU::INS_LDY_ZPX, &CPU::Y, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_ZPX_WhenitWraps) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_ZPX_WhenitWraps) {
     using namespace m6502;
     TestLoadRegisterZeroPageXorYWhenItWraps(CPU::INS_LDY_ZPX, &CPU::Y, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_ABS) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_ABS) {
     using namespace m6502;
     TestLoadRegisterAbsolute(CPU::INS_LDY_ABS, &CPU::Y, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_ABSX) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_ABSX) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorY(CPU::INS_LDY_ABSX, &CPU::Y, &CPU::X);
 }
 
-TEST_F(M6502LoadRegisterTests, LDY_ABSX_WhenItCrossesAPageBoundary) {
+TEST_F(M6502LoadRegisterTests, INS_LDY_ABSX_WhenItCrossesAPageBoundary) {
     using namespace m6502;
     TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundary(CPU::INS_LDY_ABSX, &CPU::Y, &CPU::X);
 }

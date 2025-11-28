@@ -19,15 +19,6 @@ public:
     }
 };
 
-// static void VerifyUnmodifiedFlagsFromJumpsAndCalls(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
-//     EXPECT_EQ(cpu.SF.B, cpuCopy.SF.B);
-//     EXPECT_EQ(cpu.SF.C, cpuCopy.SF.C);
-//     EXPECT_EQ(cpu.SF.D, cpuCopy.SF.D);
-//     EXPECT_EQ(cpu.SF.I, cpuCopy.SF.I);
-//     EXPECT_EQ(cpu.SF.V, cpuCopy.SF.V);
-//     EXPECT_EQ(cpu.SF.Z, cpuCopy.SF.Z);
-//     EXPECT_EQ(cpu.SF.N, cpuCopy.SF.N);
-// }
 TEST_F(M6502JumpsAndCallsTests, INS_JSR_And_INS_RTS)
 {
     //Given:
@@ -67,7 +58,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_JSR_DoesnotAffectStatusFlags)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.SF.Flags, cpuCopy.SF.Flags);
+    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
     EXPECT_NE(cpu.SP, cpuCopy.SP);
     EXPECT_EQ(cpu.PC, 0x8000);
 }
@@ -89,7 +80,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_RTS_DoesnotAffectStatusFlags)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.SF.Flags, cpuCopy.SF.Flags);
+    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
     EXPECT_EQ(cpu.PC, 0xFF03);
 }
 
@@ -109,7 +100,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_JMP_ABS)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.SF.Flags, cpuCopy.SF.Flags);
+    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
     EXPECT_EQ(cpu.SP, cpuCopy.SP);
     EXPECT_EQ(cpu.PC, 0x8000);
 }
@@ -132,7 +123,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_JMP_IND)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.SF.Flags, cpuCopy.SF.Flags);
+    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
     EXPECT_EQ(cpu.SP, cpuCopy.SP);
     EXPECT_EQ(cpu.PC, 0x9000);
 }

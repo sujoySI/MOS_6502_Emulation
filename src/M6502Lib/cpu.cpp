@@ -8,7 +8,7 @@ void m6502::MEMORY::Initialise() {
 void m6502::CPU::Reset(const UI16 ResetVector, MEMORY &memory) {
     PC = ResetVector;
     SP = 0xFF;
-    SF.Flags = 0X0000;
+    PSF.All = 0X0000;
     A = X = Y = 0x00;
     memory.Initialise();
 }
@@ -141,8 +141,8 @@ m6502::UI16 m6502::CPU::AddrIndirectY_6(SI32 &cycles, const MEMORY &memory) {
 }
 
 void m6502::CPU::LoadRegistersSetStatus(const UI8 Register) {
-    SF.Z = (Register == 0);
-    SF.N = (Register & 0b10000000) > 0;
+    PSF.Z = (Register == 0);
+    PSF.N = (Register & 0b10000000) > 0;
 }
 
 m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
@@ -155,217 +155,223 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
     const SI32 CyclesRequested = cycles;
     while (cycles > 0) {
         switch (const UI8 Instruction = FetchUI8(cycles, memory)) {
+            //
+            //LDA
             case INS_LDA_IM: //Load Accumulator ImmediateMode
             {
                 A = FetchUI8(cycles, memory);
                 LoadRegistersSetStatus(A);
-            }
-            break;
+            }break;
             case INS_LDA_ZP: //Load Accumulator ZeroPageMode
             {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 LoadRegister(Address, A);
-            }
-            break;
+            }break;
             case INS_LDA_ZPX: //Load Accumulator ZeroPageXMode
             {
                 const UI16 Address = AddrZeroPageX(cycles, memory);
                 LoadRegister(Address, A);
-            }
-            break;
+            }break;
             case INS_LDA_ABS: //Load Accumulator AbsoluteMode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 LoadRegister(Address, A);
-            }
-                break;
+            }break;
             case INS_LDA_ABSX: //Load Accumulator AbsoluteXMode
             {
                 const UI16 Address = AddrAbsoluteX(cycles, memory);
                 LoadRegister(Address, A);
-            }
-                break;
+            }break;
             case INS_LDA_ABSY: //Load Accumulator AbsoluteYMode
             {
                 const UI16 Address = AddrAbsoluteY(cycles, memory);
                 LoadRegister(Address, A);
-            }
-                break;
+            }break;
             case INS_LDA_INDX: //Load Accumulator IndexedIndirectXMode
             {
                 const UI16 Address = AddrIndirectX(cycles, memory);
                 LoadRegister(Address, A);
-            }
-                break;
+            }break;
             case INS_LDA_INDY: //Load Accumulator IndirectIndexedYMode
             {
                 const UI16 Address = AddrIndirectY(cycles, memory);
                 LoadRegister(Address, A);
-            }
-                break;
+            }break;
+
             //
             //LDX
             case INS_LDX_IM: //Load X Register ImmediateMode
             {
                 X= FetchUI8(cycles, memory);
                 LoadRegistersSetStatus(X);
-            }
-                break;
+            }break;
             case INS_LDX_ZP: //Load X Register ZeroPageMode
             {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 LoadRegister(Address, X);
-            }
-                break;
+            }break;
             case INS_LDX_ZPY: //Load X Register ZeroPageYMode
             {
                 const UI16 Address = AddrZeroPageY(cycles, memory);
                 LoadRegister(Address, X);
-            }
-                break;
+            }break;
             case INS_LDX_ABS: //Load X Register AbsoluteMode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 LoadRegister(Address, X);
-            }
-                break;
+            }break;
             case INS_LDX_ABSY: //Load X Register AbsoluteYMode
             {
                 const UI16 Address = AddrAbsoluteY(cycles, memory);
                 LoadRegister(Address, X);
-            }
-                break;
+            }break;
+
             //
             //LDY
             case INS_LDY_IM: //Load Y Register ImmediateMode
             {
                 Y = FetchUI8(cycles, memory);
                 LoadRegistersSetStatus(Y);
-            }
-                break;
+            }break;
             case INS_LDY_ZP: //Load Y Register ZeroPageMode
             {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 LoadRegister(Address, Y);
-            }
-                break;
+            }break;
             case INS_LDY_ZPX: //Load Y Register ZeroPageXMode
             {
                 const UI16 Address = AddrZeroPageX(cycles, memory);
                 LoadRegister(Address, Y);
-            }
-                break;
+            }break;
             case INS_LDY_ABS: //Load Y Register AbsoluteMode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 LoadRegister(Address, Y);
-            }
-                break;
+            }break;
             case INS_LDY_ABSX: //Load Y Register AbsoluteXMode
             {
                 const UI16 Address = AddrAbsoluteX(cycles, memory);
                 LoadRegister(Address, Y);
-            }
-                break;
+            }break;
+
             //
             // STA
             case INS_STA_ZP: //Store Accumulator ZeroPageMode
             {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STA_ZPX: //Store Accumulator ZeroPageXMode
             {
                 const UI16 Address = AddrZeroPageX(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STA_ABS: //Store Accumulator AbsoluteMode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STA_ABSX: //Store Accumulator AbsoluteXMode
             {
                 const UI16 Address = AddrAbsoluteX_5(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STA_ABSY: //Store Accumulator AbsoluteYMode
             {
                 const UI16 Address = AddrAbsoluteY_6(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STA_INDX: //Store Accumulator IndexedIndirectXMode
             {
                 const UI16 Address = AddrIndirectX(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STA_INDY: //Store Accumulator IndirectIndexedYMode
             {
                 const UI16 Address = AddrIndirectY_6(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-            }
-                break;
+            }break;
+
             //
             // STX
             case INS_STX_ZP: //Store X Register ZeroPageMode
             {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 WriteUI8(X, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STX_ZPY: //Store X Register ZeroPageYMode
             {
                 const UI16 Address = AddrZeroPageY(cycles, memory);
                 WriteUI8(X, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STX_ABS: //Store X Register AbsoluteMode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 WriteUI8(X, cycles, Address, memory);
-            }
-                break;
+            }break;
+
             //
             // STY
             case INS_STY_ZP: //Store Y Register ZeroPageMode
             {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 WriteUI8(Y, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STY_ZPX: //Store Y Register ZeroPageXMode
             {
                 const UI16 Address = AddrZeroPageX(cycles, memory);
                 WriteUI8(Y, cycles, Address, memory);
-            }
-                break;
+            }break;
             case INS_STY_ABS: //Store Y Register AbsoluteMode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 WriteUI8(Y, cycles, Address, memory);
-            }
-                break;
+            }break;
+
+            //
+            //Stack Operations
+            case INS_TSX: //Transfer SP to X register
+            {
+                X = SP;
+                --cycles;
+                LoadRegistersSetStatus(X);
+            }break;
+            case INS_TXS: //Transfer X to SP register
+            {
+                SP = X;
+                --cycles;
+            }break;
+            case INS_PHA: //Push A to stack
+            {
+                PushUI8toStack( cycles, A, memory);
+            }break;
+            case INS_PHP: //Push PSF to stack
+            {
+                PushUI8toStack( cycles, PSF.All, memory);
+            }break;
+            case INS_PLA: //Pull from stack to A
+            {
+                A = PopUI8fromStack( cycles, memory);
+                LoadRegistersSetStatus(A);
+            }break;
+            case INS_PLP: //Pull from stack to PSF
+            {
+                PSF.All = PopUI8fromStack( cycles, memory);
+            }break;
+
             //
             //Jump and Calls
             case INS_JMP_ABS: //Jump to instruction Absolute mode
             {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 PC = Address;
-            }
-                break;
+            }break;
             case INS_JMP_IND: //Jump to instruction Indirect mode
             {
                 UI16 Address = AddrAbsolute(cycles, memory);
                 Address = ReadUI16(cycles, Address,memory);
                 PC = Address;
-            }
-                break;
+            }break;
             //Note:
             // An original 6502 has does not correctly fetch the target address if the indirect vector falls on a page boundary
             // (e.g. $xxFF where xx is any value from $00 to $FF). In this case fetches the LSB from $xxFF as expected but takes
@@ -378,21 +384,18 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 PushPCtoStack(cycles, memory);
                 PC = SubAddress;
                 --cycles;
-            }
-            break;
+            }break;
             case INS_RTS: //Return To SubRoutine Only one mode
             {
                 const UI16 ReturnAddress = PopAddressFromStack(cycles, memory);
                 PC = ReturnAddress + 1;
                 cycles -= 2;
-            }
-                break;
+            }break;
             default: {
                 //If other errors occur then I blame ReadUI16's --cycles.
                 std::cout << "Instruction not handled: " << Instruction << "\n";
                 throw -1;
             }
-            break;
         }
     }
     return CyclesRequested - cycles;

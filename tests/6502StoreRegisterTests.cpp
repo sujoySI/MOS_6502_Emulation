@@ -25,13 +25,13 @@ class M6502StoreRegisterTests : public ::testing::Test {
 };
 
 static void VerifyUnmodifiedFlagsFromStoreRegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
-    EXPECT_EQ(cpu.SF.B, cpuCopy.SF.B);
-    EXPECT_EQ(cpu.SF.C, cpuCopy.SF.C);
-    EXPECT_EQ(cpu.SF.D, cpuCopy.SF.D);
-    EXPECT_EQ(cpu.SF.I, cpuCopy.SF.I);
-    EXPECT_EQ(cpu.SF.V, cpuCopy.SF.V);
-    EXPECT_EQ(cpu.SF.Z, cpuCopy.SF.Z);
-    EXPECT_EQ(cpu.SF.N, cpuCopy.SF.N);
+    EXPECT_EQ(cpu.PSF.B, cpuCopy.PSF.B);
+    EXPECT_EQ(cpu.PSF.C, cpuCopy.PSF.C);
+    EXPECT_EQ(cpu.PSF.D, cpuCopy.PSF.D);
+    EXPECT_EQ(cpu.PSF.I, cpuCopy.PSF.I);
+    EXPECT_EQ(cpu.PSF.V, cpuCopy.PSF.V);
+    EXPECT_EQ(cpu.PSF.Z, cpuCopy.PSF.Z);
+    EXPECT_EQ(cpu.PSF.N, cpuCopy.PSF.N);
 }
 
 void M6502StoreRegisterTests::TestStoreRegisterZeroPage(const m6502::UI8 OpcodeToTest,  m6502::UI8 m6502::CPU::*RegisterToTest) {
@@ -114,33 +114,33 @@ void M6502StoreRegisterTests::TestStoreRegisterAbsoluteXorY(const m6502::UI8 Opc
 }
 
 //STA
-TEST_F(M6502StoreRegisterTests, STA_ZP) {
+TEST_F(M6502StoreRegisterTests, INS_STA_ZP) {
     using namespace m6502;
     TestStoreRegisterZeroPage(CPU::INS_STA_ZP, &CPU::A);
 }
 
-TEST_F(M6502StoreRegisterTests, STA_ZPX) {
+TEST_F(M6502StoreRegisterTests, INS_STA_ZPX) {
     using namespace m6502;
     TestStoreRegisterZeroPageXorY(CPU::INS_STA_ZPX, &CPU::A, &CPU::X);
 }
 
 
-TEST_F(M6502StoreRegisterTests, STA_ABS) {
+TEST_F(M6502StoreRegisterTests, INS_STA_ABS) {
     using namespace m6502;
     TestStoreRegisterAbsolute(CPU::INS_STA_ABS, &CPU::A);
 }
 
-TEST_F(M6502StoreRegisterTests, STA_ABSX) {
+TEST_F(M6502StoreRegisterTests, INS_STA_ABSX) {
     using namespace m6502;
     TestStoreRegisterAbsoluteXorY(CPU::INS_STA_ABSX, &CPU::A, &CPU::X);
 }
 
-TEST_F(M6502StoreRegisterTests, STA_ABSY) {
+TEST_F(M6502StoreRegisterTests, INS_STA_ABSY) {
     using namespace m6502;
     TestStoreRegisterAbsoluteXorY(CPU::INS_STA_ABSY, &CPU::A, &CPU::Y);
 }
 
-TEST_F(M6502StoreRegisterTests, STA_INDX) {
+TEST_F(M6502StoreRegisterTests, INS_STA_INDX) {
     //Given:
     using namespace m6502;
     ExpectedCycles = 6;
@@ -162,7 +162,7 @@ TEST_F(M6502StoreRegisterTests, STA_INDX) {
     VerifyUnmodifiedFlagsFromStoreRegister(cpu, cpuCopy);
 }
 
-TEST_F(M6502StoreRegisterTests, STA_INDY) {
+TEST_F(M6502StoreRegisterTests, INS_STA_INDY) {
     //Given:
     using namespace m6502;
     ExpectedCycles = 6;
@@ -185,33 +185,33 @@ TEST_F(M6502StoreRegisterTests, STA_INDY) {
 }
 
 //STX
-TEST_F(M6502StoreRegisterTests, STX_ZP) {
+TEST_F(M6502StoreRegisterTests, INS_STX_ZP) {
     using namespace m6502;
     TestStoreRegisterZeroPage(CPU::INS_STX_ZP, &CPU::X);
 }
 
-TEST_F(M6502StoreRegisterTests, STX_ZPY) {
+TEST_F(M6502StoreRegisterTests, INS_STX_ZPY) {
     using namespace m6502;
     TestStoreRegisterZeroPageXorY(CPU::INS_STX_ZPY, &CPU::X, &CPU::Y);
 }
 
-TEST_F(M6502StoreRegisterTests, STX_ABS) {
+TEST_F(M6502StoreRegisterTests, INS_STX_ABS) {
     using namespace m6502;
     TestStoreRegisterAbsolute(CPU::INS_STX_ABS, &CPU::X);
 }
 
 //STY
-TEST_F(M6502StoreRegisterTests, STY_ZP) {
+TEST_F(M6502StoreRegisterTests, INS_STY_ZP) {
     using namespace m6502;
     TestStoreRegisterZeroPage(CPU::INS_STY_ZP, &CPU::Y);
 }
 
-TEST_F(M6502StoreRegisterTests, STY_ZPX) {
+TEST_F(M6502StoreRegisterTests, INS_STY_ZPX) {
     using namespace m6502;
     TestStoreRegisterZeroPageXorY(CPU::INS_STY_ZPX, &CPU::Y, &CPU::X);
 }
 
-TEST_F(M6502StoreRegisterTests, STY_ABS) {
+TEST_F(M6502StoreRegisterTests, INS_STY_ABS) {
     using namespace m6502;
     TestStoreRegisterAbsolute(CPU::INS_STY_ABS, &CPU::Y);
 }
