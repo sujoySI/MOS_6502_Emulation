@@ -11,7 +11,7 @@ class M6502StoreRegisterTests : public ::testing::Test {
         m6502::SI32 ExpectedCycles;
         virtual void SetUp()
         {
-            cpu.Reset(mem);
+            cpu.Reset(0xFFFC, mem);
         }
 
         virtual void TearDown()

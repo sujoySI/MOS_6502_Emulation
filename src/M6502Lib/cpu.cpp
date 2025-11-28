@@ -1,34 +1,40 @@
 #include "M6502Lib/cpu.h"
 #include <cstring>
 
-static m6502::UI8 ReadUI8(m6502::SI32 &cycles, const m6502::UI16 address, const m6502::MEMORY &memory) {
-    const m6502::UI8 Datas = memory.Data[address];
-    --cycles;
-    return Datas;
-}
-
-static m6502::UI16 ReadUI16(m6502::SI32 &cycles, const m6502::UI16 address, const m6502::MEMORY &memory) {
-    const m6502::UI8 LoByte = ReadUI8(cycles, address, memory);
-    const m6502::UI8 HiByte = ReadUI8(cycles, address + 1, memory);
-    return LoByte | (HiByte << 8);
-}
-
 void m6502::MEMORY::Initialise() {
     memset(Data, 0x00, MAX_MEM * sizeof(Data[0]));
 }
 
-void m6502::MEMORY::WriteUI16(SI32 &cycles, const UI16 value, const UI32 address) {
-    Data[address] = value & 0xFF;
-    Data[address + 1] = (value >> 8);
-    cycles -= 2;
-}
-
-void m6502::CPU::Reset(MEMORY &memory) {
-    PC = 0xFFFC;
-    SP = 0x00;
+void m6502::CPU::Reset(const UI16 ResetVector, MEMORY &memory) {
+    PC = ResetVector;
+    SP = 0xFF;
     SF.Flags = 0X0000;
     A = X = Y = 0x00;
     memory.Initialise();
+}
+
+m6502::UI8 m6502::CPU::ReadUI8(SI32 &cycles, const UI16 address, const MEMORY &memory) {
+    const UI8 Datas = memory.Data[address];
+    --cycles;
+    return Datas;
+}
+
+m6502::UI16 m6502::CPU::ReadUI16(SI32 &cycles, const UI16 address, const MEMORY &memory) {
+    const UI8 LoByte = ReadUI8(cycles, address, memory);
+    const UI8 HiByte = ReadUI8(cycles, address + 1, memory);
+    UI16 value = LoByte | (HiByte << 8);
+    return value;
+}
+
+void m6502::CPU::WriteUI8(const UI8 value ,SI32 &cycles, const UI16 address, MEMORY &memory) {
+    memory.Data[address] = value;
+    --cycles;
+}
+
+void m6502::CPU::WriteUI16( const UI16 value, SI32 &cycles, const UI16 address, MEMORY &memory) {
+    memory.Data[address] = value & 0xFF;
+    memory.Data[address + 1] = (value >> 8);
+    cycles -= 2;
 }
 
 m6502::UI8 m6502::CPU::FetchUI8(SI32 &cycles, const MEMORY &memory) {
@@ -38,7 +44,6 @@ m6502::UI8 m6502::CPU::FetchUI8(SI32 &cycles, const MEMORY &memory) {
     return Datas;
 }
 
-
 m6502::UI16 m6502::CPU::FetchUI16(SI32 &cycles, const MEMORY &memory) {
     //6502 is Little Endian
     UI16 Datas = memory.Data[PC];
@@ -46,16 +51,10 @@ m6502::UI16 m6502::CPU::FetchUI16(SI32 &cycles, const MEMORY &memory) {
     Datas |= (memory.Data[PC] << 8);
     ++PC;
     cycles -= 2;
-    // If I wanted to handle endianness I would have to swap bytes here
-    //if(PLATFORM_BIG_ENDIAN)
-    //SwapBytesInWord(Data);
     return Datas;
 }
 
-void m6502::CPU::WriteUI8( UI8 value ,SI32 &cycles, UI16 address, MEMORY &memory) {
-    memory.Data[address] = value;
-    --cycles;
-}
+
 
 m6502::UI16 m6502::CPU::AddrZeroPage(SI32 &cycles, const MEMORY &memory) {
     const UI8 ZeroPageAddr = FetchUI8(cycles, memory);
@@ -98,6 +97,22 @@ m6502::UI16 m6502::CPU::AddrAbsoluteY(SI32 &cycles, const MEMORY &memory) {
     return AbsAddressY;
 }
 
+//Takes 5 cycles always
+m6502::UI16 m6502::CPU::AddrAbsoluteX_5(SI32 &cycles, const MEMORY &memory) {
+    const UI16 AbsAddress = FetchUI16(cycles, memory);
+    const UI16 AbsAddressX = AbsAddress + X;
+    --cycles;
+    return AbsAddressX;
+}
+
+//Takes 6 cycles always
+m6502::UI16 m6502::CPU::AddrAbsoluteY_6(SI32 &cycles, const MEMORY &memory) {
+    const UI16 AbsAddress = FetchUI16(cycles, memory);
+    const UI16 AbsAddressY = AbsAddress + Y;
+    --cycles;
+    return AbsAddressY;
+}
+
 m6502::UI16 m6502::CPU::AddrIndirectX(SI32 &cycles, const MEMORY &memory) {
     UI8 ZpAddress = FetchUI8(cycles, memory);
     ZpAddress += X;
@@ -116,13 +131,22 @@ m6502::UI16 m6502::CPU::AddrIndirectY(SI32 &cycles, const MEMORY &memory) {
     return EffectiveAddressY;
 }
 
+//Takes 6 cycles always
+m6502::UI16 m6502::CPU::AddrIndirectY_6(SI32 &cycles, const MEMORY &memory) {
+    const UI8 ZpAddress = FetchUI8(cycles, memory);
+    const UI16 EffectiveAddress = ReadUI16(cycles, ZpAddress,memory);
+    const UI16 EffectiveAddressY = EffectiveAddress + Y;
+    --cycles;
+    return EffectiveAddressY;
+}
+
 void m6502::CPU::LoadRegistersSetStatus(const UI8 Register) {
     SF.Z = (Register == 0);
     SF.N = (Register & 0b10000000) > 0;
 }
 
 m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
-    auto LoadRegister = [&cycles, &memory, this] (UI16 Address, UI8& Register)
+    auto LoadRegister = [&cycles, &memory, this] (const UI16 Address, UI8& Register)
     {
         Register = ReadUI8(cycles, Address, memory);
         LoadRegistersSetStatus(Register);
@@ -265,18 +289,14 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 break;
             case INS_STA_ABSX: //Store Accumulator AbsoluteXMode
             {
-                //Less Cycles Consumed so added --cycles something needs fixing
-                const UI16 Address = AddrAbsoluteX(cycles, memory);
+                const UI16 Address = AddrAbsoluteX_5(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-                --cycles;
             }
                 break;
             case INS_STA_ABSY: //Store Accumulator AbsoluteYMode
             {
-                //Less Cycles Consumed so added --cycles something needs fixing
-                const UI16 Address = AddrAbsoluteY(cycles, memory);
+                const UI16 Address = AddrAbsoluteY_6(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-                --cycles;
             }
                 break;
             case INS_STA_INDX: //Store Accumulator IndexedIndirectXMode
@@ -287,17 +307,15 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 break;
             case INS_STA_INDY: //Store Accumulator IndirectIndexedYMode
             {
-                //Less Cycles Consumed so added --cycles something needs fixing
-                const UI16 Address = AddrIndirectY(cycles, memory);
+                const UI16 Address = AddrIndirectY_6(cycles, memory);
                 WriteUI8(A, cycles, Address, memory);
-                --cycles;
             }
                 break;
             //
             // STX
             case INS_STX_ZP: //Store X Register ZeroPageMode
             {
-                UI16 Address = AddrZeroPage(cycles, memory);
+                const UI16 Address = AddrZeroPage(cycles, memory);
                 WriteUI8(X, cycles, Address, memory);
             }
                 break;
@@ -317,7 +335,7 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
             // STY
             case INS_STY_ZP: //Store Y Register ZeroPageMode
             {
-                UI16 Address = AddrZeroPage(cycles, memory);
+                const UI16 Address = AddrZeroPage(cycles, memory);
                 WriteUI8(Y, cycles, Address, memory);
             }
                 break;
@@ -334,16 +352,41 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
             }
                 break;
             //
-            //JSR
+            //Jump and Calls
+            case INS_JMP_ABS: //Jump to instruction Absolute mode
+            {
+                const UI16 Address = AddrAbsolute(cycles, memory);
+                PC = Address;
+            }
+                break;
+            case INS_JMP_IND: //Jump to instruction Indirect mode
+            {
+                UI16 Address = AddrAbsolute(cycles, memory);
+                Address = ReadUI16(cycles, Address,memory);
+                PC = Address;
+            }
+                break;
+            //Note:
+            // An original 6502 has does not correctly fetch the target address if the indirect vector falls on a page boundary
+            // (e.g. $xxFF where xx is any value from $00 to $FF). In this case fetches the LSB from $xxFF as expected but takes
+            // the MSB from $xx00. This is fixed in some later chips like the 65SC02 so for compatibility always ensure the indirect
+            // vector is not at the end of the page.
+            // **
             case INS_JSR: //Jump SubRoutine Only one mode
             {
                 const UI16 SubAddress = FetchUI16(cycles, memory);
-                memory.WriteUI16(cycles, PC - 1, SP);
-                ++SP;
+                PushPCtoStack(cycles, memory);
                 PC = SubAddress;
                 --cycles;
             }
             break;
+            case INS_RTS: //Return To SubRoutine Only one mode
+            {
+                const UI16 ReturnAddress = PopAddressFromStack(cycles, memory);
+                PC = ReturnAddress + 1;
+                cycles -= 2;
+            }
+                break;
             default: {
                 //If other errors occur then I blame ReadUI16's --cycles.
                 std::cout << "Instruction not handled: " << Instruction << "\n";
