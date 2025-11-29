@@ -146,10 +146,22 @@ void m6502::CPU::LoadRegistersSetStatus(const UI8 Register) {
 }
 
 m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
-    auto LoadRegister = [&cycles, &memory, this] (const UI16 Address, UI8& Register)
-    {
+    auto LoadRegister = [&cycles, &memory, this] (const UI16 Address, UI8& Register){
         Register = ReadUI8(cycles, Address, memory);
         LoadRegistersSetStatus(Register);
+    };
+
+    auto AndOp = [&cycles, &memory, this] (const UI16 Address){
+        A &= ReadUI8(cycles, Address, memory);
+        LoadRegistersSetStatus(A);
+    };
+    auto EorOp = [&cycles, &memory, this] (const UI16 Address){
+        A ^= ReadUI8(cycles, Address, memory);
+        LoadRegistersSetStatus(A);
+    };
+    auto OraOp = [&cycles, &memory, this] (const UI16 Address){
+        A |= ReadUI8(cycles, Address, memory);
+        LoadRegistersSetStatus(A);
     };
 
     const SI32 CyclesRequested = cycles;
@@ -357,6 +369,136 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
             case INS_PLP: //Pull from stack to PSF
             {
                 PSF.All = PopUI8fromStack( cycles, memory);
+            }break;
+
+            //
+            // Logical
+            //AND
+            case INS_AND_IM: {
+                A &= FetchUI8(cycles, memory);
+                LoadRegistersSetStatus(A);
+            }break;
+            case INS_AND_ZP: {
+                const UI16 Address = AddrZeroPage(cycles, memory);
+                AndOp(Address);
+            }break;
+            case INS_AND_ZPX: {
+                const UI16 Address = AddrZeroPageX(cycles, memory);
+                AndOp(Address);
+            }break;
+            case INS_AND_ABS: //And to Accumulator AbsoluteMode
+            {
+                const UI16 Address = AddrAbsolute(cycles, memory);
+                AndOp(Address);
+            }break;
+            case INS_AND_ABSX: //And to Accumulator AbsoluteXMode
+            {
+                const UI16 Address = AddrAbsoluteX(cycles, memory);
+                AndOp(Address);
+            }break;
+            case INS_AND_ABSY: //And to Accumulator AbsoluteYMode
+            {
+                const UI16 Address = AddrAbsoluteY(cycles, memory);
+                AndOp(Address);
+            }break;
+            case INS_AND_INDX: //And to Accumulator IndexedIndirectXMode
+            {
+                const UI16 Address = AddrIndirectX(cycles, memory);
+                AndOp(Address);
+            }break;
+            case INS_AND_INDY: //And to Accumulator IndexedIndirectYMode
+            {
+                const UI16 Address = AddrIndirectY(cycles, memory);
+                AndOp(Address);
+            }break;
+            //EOR
+            case INS_EOR_IM: {
+                A ^= FetchUI8(cycles, memory);
+                LoadRegistersSetStatus(A);
+            }break;
+            case INS_EOR_ZP: {
+                const UI16 Address = AddrZeroPage(cycles, memory);
+                EorOp(Address);
+            }break;
+            case INS_EOR_ZPX: {
+                const UI16 Address = AddrZeroPageX(cycles, memory);
+                EorOp(Address);
+            }break;
+            case INS_EOR_ABS: //Eor to Accumulator AbsoluteMode
+            {
+                const UI16 Address = AddrAbsolute(cycles, memory);
+                EorOp(Address);
+            }break;
+            case INS_EOR_ABSX: //Eor to Accumulator AbsoluteXMode
+            {
+                const UI16 Address = AddrAbsoluteX(cycles, memory);
+                EorOp(Address);
+            }break;
+            case INS_EOR_ABSY: //Eor to Accumulator AbsoluteYMode
+            {
+                const UI16 Address = AddrAbsoluteY(cycles, memory);
+                EorOp(Address);
+            }break;
+            case INS_EOR_INDX: //Eor to Accumulator IndexedIndirectXMode
+            {
+                const UI16 Address = AddrIndirectX(cycles, memory);
+                EorOp(Address);
+            }break;
+            case INS_EOR_INDY: //Eor to Accumulator IndexedIndirectYMode
+            {
+                const UI16 Address = AddrIndirectY(cycles, memory);
+                EorOp(Address);
+            }break;
+            //ORA
+            case INS_ORA_IM: {
+                A |= FetchUI8(cycles, memory);
+                LoadRegistersSetStatus(A);
+            }break;
+            case INS_ORA_ZP: {
+                const UI16 Address = AddrZeroPage(cycles, memory);
+                OraOp(Address);
+            }break;
+            case INS_ORA_ZPX: {
+                const UI16 Address = AddrZeroPageX(cycles, memory);
+                OraOp(Address);
+            }break;
+            case INS_ORA_ABS: //Or to Accumulator AbsoluteMode
+            {
+                const UI16 Address = AddrAbsolute(cycles, memory);
+                OraOp(Address);
+            }break;
+            case INS_ORA_ABSX: //Or to Accumulator AbsoluteXMode
+            {
+                const UI16 Address = AddrAbsoluteX(cycles, memory);
+                OraOp(Address);
+            }break;
+            case INS_ORA_ABSY: //Or to Accumulator AbsoluteYMode
+            {
+                const UI16 Address = AddrAbsoluteY(cycles, memory);
+                OraOp(Address);
+            }break;
+            case INS_ORA_INDX: //Or to Accumulator IndexedIndirectXMode
+            {
+                const UI16 Address = AddrIndirectX(cycles, memory);
+                OraOp(Address);
+            }break;
+            case INS_ORA_INDY: //Or to Accumulator IndexedIndirectYMode
+            {
+                const UI16 Address = AddrIndirectY(cycles, memory);
+                OraOp(Address);
+            }break;
+            //BIT
+            case INS_BIT_ZP: {
+                const UI16 Address = AddrZeroPage(cycles, memory);
+                const UI8 Value = ReadUI8(cycles, Address, memory);
+                PSF.Z = !(A & Value);
+                PSF.All |= (Value & 0b11000000);
+            }break;
+            case INS_BIT_ABS: {
+                const UI16 Address = AddrAbsolute(cycles, memory);
+                const UI8 Value = ReadUI8(cycles, Address, memory);
+                PSF.Z = !(A & Value);
+                PSF.All |= (Value & 0b11000000);
             }break;
 
             //
