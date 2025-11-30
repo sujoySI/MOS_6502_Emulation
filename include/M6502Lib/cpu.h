@@ -42,7 +42,7 @@ struct m6502::CPU {
     UI8 A; //Accumulator or Main register
     UI8 X; //Index register X
     UI8 Y; //Index register Y
-    FLAG PSF; //Processor Status Flag Register
+    FLAG PS; //Processor Status Flag Register
     void Reset(UI16 ResetVector, MEMORY &memory);
 
     static UI8 ReadUI8(SI32 &cycles, UI16 address, const MEMORY &memory);
@@ -85,6 +85,11 @@ struct m6502::CPU {
         cycles -= 3;
         return value;
     }
+
+    //Process Status bits
+    static constexpr UI8
+        NegativeFLagBit = 0b10000000,
+        OverFlowFLagBit = 0b01000000;
 
     //OPCODES
     static constexpr UI8
@@ -181,6 +186,11 @@ struct m6502::CPU {
 
     //Status
     void LoadRegistersSetStatus(UI8 Register);
+
+    UI16 LoadPrg(const UI8* Program, SI32 Numbytes, MEMORY &memory);
+
+    void PrintStatus() const;
+    void PrintStatusHex() const;
 
     [[nodiscard]] SI32 Execute(SI32 cycles, MEMORY &memory);
 

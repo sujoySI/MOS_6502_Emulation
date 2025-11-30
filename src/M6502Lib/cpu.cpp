@@ -8,7 +8,7 @@ void m6502::MEMORY::Initialise() {
 void m6502::CPU::Reset(const UI16 ResetVector, MEMORY &memory) {
     PC = ResetVector;
     SP = 0xFF;
-    PSF.All = 0X0000;
+    PS.All = 0X0000;
     A = X = Y = 0x00;
     memory.Initialise();
 }
@@ -141,8 +141,8 @@ m6502::UI16 m6502::CPU::AddrIndirectY_6(SI32 &cycles, const MEMORY &memory) {
 }
 
 void m6502::CPU::LoadRegistersSetStatus(const UI8 Register) {
-    PSF.Z = (Register == 0);
-    PSF.N = (Register & 0b10000000) > 0;
+    PS.Z = (Register == 0);
+    PS.N = (Register & 0b10000000) > 0;
 }
 
 m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
@@ -359,7 +359,7 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
             }break;
             case INS_PHP: //Push PSF to stack
             {
-                PushUI8toStack( cycles, PSF.All, memory);
+                PushUI8toStack( cycles, PS.All, memory);
             }break;
             case INS_PLA: //Pull from stack to A
             {
@@ -368,7 +368,7 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
             }break;
             case INS_PLP: //Pull from stack to PSF
             {
-                PSF.All = PopUI8fromStack( cycles, memory);
+                PS.All = PopUI8fromStack( cycles, memory);
             }break;
 
             //
@@ -491,14 +491,16 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
             case INS_BIT_ZP: {
                 const UI16 Address = AddrZeroPage(cycles, memory);
                 const UI8 Value = ReadUI8(cycles, Address, memory);
-                PSF.Z = !(A & Value);
-                PSF.All |= (Value & 0b11000000);
+                PS.Z = !(A & Value);
+                PS.N = (Value & NegativeFLagBit) !=0;
+                PS.V = (Value & OverFlowFLagBit) !=0;
             }break;
             case INS_BIT_ABS: {
                 const UI16 Address = AddrAbsolute(cycles, memory);
                 const UI8 Value = ReadUI8(cycles, Address, memory);
-                PSF.Z = !(A & Value);
-                PSF.All |= (Value & 0b11000000);
+                PS.Z = !(A & Value);
+                PS.N = (Value & NegativeFLagBit) !=0;
+                PS.V = (Value & OverFlowFLagBit) !=0;
             }break;
 
             //
@@ -541,4 +543,30 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
         }
     }
     return CyclesRequested - cycles;
+}
+
+m6502::UI16 m6502::CPU::LoadPrg(const UI8 *Program, const SI32 Numbytes, MEMORY &memory) {
+    UI16 LoadAddress = 0;
+    if (Program && Numbytes > 2) {
+        SI32 At = 0;
+        UI16 Lo = Program[At++];
+        UI16 Hi = (Program[At++] << 8);
+        LoadAddress = Lo | Hi;
+        for (SI32 i = LoadAddress; i < LoadAddress+Numbytes-2 ; ++i) {
+            memory.Data[i] = Program[At++];
+        }
+    }
+    return LoadAddress;
+}
+
+void m6502::CPU::PrintStatus() const {
+    std::cout<<"A:"<<A<<" X:"<<X<<" Y:"<<Y<<"\n";
+    std::cout<<"PC:"<<PC<<" SP:"<<SP<<"\n";
+    std::cout<<"PS:"<<PS.All<<"\n\n";
+}
+
+void m6502::CPU::PrintStatusHex() const {
+    std::cout<<std::hex<<"A:"<<A<<" X:0x"<<X<<" Y:0x"<<Y<<"\n";
+    std::cout<<std::hex<<"PC:0x"<<PC<<" SP:0x"<<SP<<"\n";
+    std::cout<<std::hex<<"PS:0x"<<PS.All<<"\n\n";
 }

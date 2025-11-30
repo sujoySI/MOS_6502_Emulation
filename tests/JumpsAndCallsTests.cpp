@@ -58,7 +58,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_JSR_DoesnotAffectStatusFlags)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpuCopy.PS.All);
     EXPECT_NE(cpu.SP, cpuCopy.SP);
     EXPECT_EQ(cpu.PC, 0x8000);
 }
@@ -80,7 +80,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_RTS_DoesnotAffectStatusFlags)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpuCopy.PS.All);
     EXPECT_EQ(cpu.PC, 0xFF03);
 }
 
@@ -100,7 +100,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_JMP_ABS)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpuCopy.PS.All);
     EXPECT_EQ(cpu.SP, cpuCopy.SP);
     EXPECT_EQ(cpu.PC, 0x8000);
 }
@@ -123,7 +123,7 @@ TEST_F(M6502JumpsAndCallsTests, INS_JMP_IND)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.PSF.All, cpuCopy.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpuCopy.PS.All);
     EXPECT_EQ(cpu.SP, cpuCopy.SP);
     EXPECT_EQ(cpu.PC, 0x9000);
 }

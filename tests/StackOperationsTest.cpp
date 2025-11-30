@@ -25,7 +25,7 @@ TEST_F(M6502StackOperationsTests, INS_TSX)
     using namespace m6502;
     ExpectedCycles = 2;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     cpu.X = 0x00;
     cpu.SP = 0x01;
     mem.Data[0xFF00] = CPU::INS_TSX;
@@ -37,8 +37,8 @@ TEST_F(M6502StackOperationsTests, INS_TSX)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(cpu.X, 0x01);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_FALSE(cpu.PSF.N);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_FALSE(cpu.PS.N);
 }
 TEST_F(M6502StackOperationsTests, INS_TSX_ZeroStackPointer)
 {
@@ -46,7 +46,7 @@ TEST_F(M6502StackOperationsTests, INS_TSX_ZeroStackPointer)
     using namespace m6502;
     ExpectedCycles = 2;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     cpu.X = 0x00;
     cpu.SP = 0x00;
     mem.Data[0xFF00] = CPU::INS_TSX;
@@ -58,8 +58,8 @@ TEST_F(M6502StackOperationsTests, INS_TSX_ZeroStackPointer)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(cpu.X, 0x00);
-    EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_FALSE(cpu.PSF.N);
+    EXPECT_TRUE(cpu.PS.Z);
+    EXPECT_FALSE(cpu.PS.N);
 }
 TEST_F(M6502StackOperationsTests, INS_TSX_NegativeStackPointer)
 {
@@ -67,7 +67,7 @@ TEST_F(M6502StackOperationsTests, INS_TSX_NegativeStackPointer)
     using namespace m6502;
     ExpectedCycles = 2;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.Z = cpu.PSF.N = false;
+    cpu.PS.Z = cpu.PS.N = false;
     cpu.X = 0x00;
     cpu.SP = 0b10000000;
     mem.Data[0xFF00] = CPU::INS_TSX;
@@ -79,8 +79,8 @@ TEST_F(M6502StackOperationsTests, INS_TSX_NegativeStackPointer)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(cpu.X, 0b10000000);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_TRUE(cpu.PS.N);
 }
 TEST_F(M6502StackOperationsTests, INS_TXS)
 {
@@ -99,7 +99,7 @@ TEST_F(M6502StackOperationsTests, INS_TXS)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(cpu.SP, 0xFF);
-    EXPECT_EQ(cpu.PSF.All, cpu.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpu.PS.All);
 }
 TEST_F(M6502StackOperationsTests, INS_PHA)
 {
@@ -117,7 +117,7 @@ TEST_F(M6502StackOperationsTests, INS_PHA)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(mem.Data[cpu.SPtoAddress() + 1], cpu.A);
-    EXPECT_EQ(cpu.PSF.All, cpu.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpu.PS.All);
     EXPECT_EQ(cpu.SP, 0xFE);
 }
 TEST_F(M6502StackOperationsTests, INS_PHP)
@@ -126,7 +126,7 @@ TEST_F(M6502StackOperationsTests, INS_PHP)
     using namespace m6502;
     ExpectedCycles = 3;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.All = 0xCC;
+    cpu.PS.All = 0xCC;
     mem.Data[0xFF00] = CPU::INS_PHP;
 
     //When:
@@ -136,7 +136,7 @@ TEST_F(M6502StackOperationsTests, INS_PHP)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(mem.Data[cpu.SPtoAddress() + 1], 0xCC);
-    EXPECT_EQ(cpu.PSF.All, cpu.PSF.All);
+    EXPECT_EQ(cpu.PS.All, cpu.PS.All);
     EXPECT_EQ(cpu.SP, 0xFE);
 }
 TEST_F(M6502StackOperationsTests, INS_PLA)
@@ -165,8 +165,8 @@ TEST_F(M6502StackOperationsTests, INS_PLA_ZeroValueFromStack)
     using namespace m6502;
     ExpectedCycles = 4;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.Z = false;
-    cpu.PSF.N = true;
+    cpu.PS.Z = false;
+    cpu.PS.N = true;
     cpu.A = 0x42;
     cpu.SP = 0xFE;
     mem.Data[0x01FF] = 0x00;
@@ -179,8 +179,8 @@ TEST_F(M6502StackOperationsTests, INS_PLA_ZeroValueFromStack)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(cpu.A, 0x00);
-    EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_FALSE(cpu.PSF.N);
+    EXPECT_TRUE(cpu.PS.Z);
+    EXPECT_FALSE(cpu.PS.N);
     EXPECT_EQ(cpu.SP, 0xFF);
 }
 TEST_F(M6502StackOperationsTests, INS_PLA_NegativeValueFromStack)
@@ -189,8 +189,8 @@ TEST_F(M6502StackOperationsTests, INS_PLA_NegativeValueFromStack)
     using namespace m6502;
     ExpectedCycles = 4;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.N = false;
-    cpu.PSF.Z = true;
+    cpu.PS.N = false;
+    cpu.PS.Z = true;
     cpu.A = 0x42;
     cpu.SP = 0xFE;
     mem.Data[0x01FF] = 0b10000001;
@@ -203,8 +203,8 @@ TEST_F(M6502StackOperationsTests, INS_PLA_NegativeValueFromStack)
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
     EXPECT_EQ(cpu.A, 0b10000001);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_FALSE(cpu.PSF.Z);
+    EXPECT_TRUE(cpu.PS.N);
+    EXPECT_FALSE(cpu.PS.Z);
     EXPECT_EQ(cpu.SP, 0xFF);
 }
 TEST_F(M6502StackOperationsTests, INS_PLP)
@@ -213,7 +213,7 @@ TEST_F(M6502StackOperationsTests, INS_PLP)
     using namespace m6502;
     ExpectedCycles = 4;
     cpu.Reset(0xFF00, mem);
-    cpu.PSF.All = 0x00;
+    cpu.PS.All = 0x00;
     cpu.SP = 0xFE;
     mem.Data[0x01FF] = 0x42;
     mem.Data[0xFF00] = CPU::INS_PLP;
@@ -224,5 +224,5 @@ TEST_F(M6502StackOperationsTests, INS_PLP)
 
     //Then:
     EXPECT_EQ(cycles, ExpectedCycles);
-    EXPECT_EQ(cpu.PSF.All, 0x42);
+    EXPECT_EQ(cpu.PS.All, 0x42);
 }

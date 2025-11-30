@@ -53,11 +53,11 @@ class M6502LogicalAndEorOraBitTests : public ::testing::Test {
 };
 
 static void VerifyUnmodifiedFlagsFromLogicalOpOnARegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
-    EXPECT_EQ(cpu.PSF.B, cpuCopy.PSF.B);
-    EXPECT_EQ(cpu.PSF.C, cpuCopy.PSF.C);
-    EXPECT_EQ(cpu.PSF.D, cpuCopy.PSF.D);
-    EXPECT_EQ(cpu.PSF.I, cpuCopy.PSF.I);
-    EXPECT_EQ(cpu.PSF.V, cpuCopy.PSF.V);
+    EXPECT_EQ(cpu.PS.B, cpuCopy.PS.B);
+    EXPECT_EQ(cpu.PS.C, cpuCopy.PS.C);
+    EXPECT_EQ(cpu.PS.D, cpuCopy.PS.D);
+    EXPECT_EQ(cpu.PS.I, cpuCopy.PS.I);
+    EXPECT_EQ(cpu.PS.V, cpuCopy.PS.V);
 }
 
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterImmediate(const ELogicalOp LogicalOp){
@@ -86,8 +86,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterImmediate(const ELog
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x84, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -118,8 +118,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterImmediateAffectsZero
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x0, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     const bool ExpectedZero = (cpu.A == 0);
-    EXPECT_EQ(cpu.PSF.Z, ExpectedZero);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_EQ(cpu.PS.Z, ExpectedZero);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
 }
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterZeroPage(const ELogicalOp LogicalOp){
@@ -149,8 +149,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterZeroPage(const ELogi
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -182,8 +182,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterZeroPageX(const ELog
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -214,8 +214,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterZeroPageXWhenItWraps
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -223,7 +223,7 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsolute(const ELogi
 {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 4;
     cpu.X = 5;
     cpu.A = 0xCC;
@@ -250,8 +250,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsolute(const ELogi
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -259,7 +259,7 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteX(const ELog
 {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 4;
     cpu.X = 1;
     cpu.A = 0xCC;
@@ -286,8 +286,8 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteX(const ELog
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
@@ -295,7 +295,7 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteY(const ELog
 {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 4;
     cpu.Y = 1;
     cpu.A = 0xCC;
@@ -322,15 +322,15 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteY(const ELog
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteXWhenCrossingPageBoundary(const ELogicalOp LogicalOp) {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 5;
     cpu.A = 0xCC;
     cpu.X = 0xFF;
@@ -357,15 +357,15 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteXWhenCrossin
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteYWhenCrossingPageBoundary(const ELogicalOp LogicalOp) {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 5;
     cpu.A = 0xCC;
     cpu.Y = 0xFF;
@@ -392,15 +392,15 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterAbsoluteYWhenCrossin
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterIndrirectX(const ELogicalOp LogicalOp) {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 6;
     cpu.X = 0x04;
     cpu.A = 0xCC;
@@ -428,15 +428,15 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterIndrirectX(const ELo
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterIndrirectY(const ELogicalOp LogicalOp) {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 5;
     cpu.Y = 0x04;
     cpu.A = 0xCC;
@@ -464,15 +464,15 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterIndrirectY(const ELo
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterIndrirectYWhenItCrossesAPageBoundary(const ELogicalOp LogicalOp) {
     //Given:
     using namespace m6502;
-    cpu.PSF.Z = cpu.PSF.N = true;
+    cpu.PS.Z = cpu.PS.N = true;
     ExpectedCycles = 6;
     cpu.A = 0xCC;
     cpu.Y = 0xFF;
@@ -500,13 +500,11 @@ void M6502LogicalAndEorOraBitTests::TestLogicalOpOnARegisterIndrirectYWhenItCros
     const UI8 ExpectedResult = DoLogicalOp(0xCC, 0x37, LogicalOp);
     const bool ExpectedNegative = (ExpectedResult & 0b10000000 ) > 0;
     EXPECT_EQ(cpu.A, ExpectedResult);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, ExpectedNegative);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_EQ(cpu.PS.N, ExpectedNegative);
     VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
-
-
 
 //AND
 TEST_F(M6502LogicalAndEorOraBitTests, INS_AND_IM) {
@@ -675,6 +673,7 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP) {
     //Given:
     using namespace m6502;
     ExpectedCycles = 3;
+    cpu.PS.N = cpu.PS.V = false;
     cpu.A = 0xCC;
     mem.Data[0xFFFC] = CPU::INS_BIT_ZP;
     mem.Data[0xFFFD] = 0x42;
@@ -685,17 +684,16 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
     EXPECT_EQ(cpu.A, 0xCC);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_TRUE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_TRUE(cpu.PS.N);
+    EXPECT_TRUE(cpu.PS.V);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP_ResultZero) {
     //Given:
     using namespace m6502;
+    cpu.PS.N = cpu.PS.V = true;
     ExpectedCycles = 3;
     cpu.A = 0xCC;
     mem.Data[0xFFFC] = CPU::INS_BIT_ZP;
@@ -707,18 +705,17 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP_ResultZero) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
     EXPECT_EQ(cpu.A, 0xCC);
-    EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_FALSE(cpu.PSF.N);
-    EXPECT_FALSE(cpu.PSF.V);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    EXPECT_TRUE(cpu.PS.Z);
+    EXPECT_FALSE(cpu.PS.N);
+    EXPECT_FALSE(cpu.PS.V);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP_ResultZero_Bit6and7areZero) {
     //Given:
     using namespace m6502;
     ExpectedCycles = 3;
+    cpu.PS.N = cpu.PS.V = false;
     cpu.A = 0x33;
     mem.Data[0xFFFC] = CPU::INS_BIT_ZP;
     mem.Data[0xFFFD] = 0x42;
@@ -729,19 +726,18 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP_ResultZero_Bit6and7areZero) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
     EXPECT_EQ(cpu.A, 0x33);
-    EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_TRUE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    EXPECT_TRUE(cpu.PS.Z);
+    EXPECT_TRUE(cpu.PS.N);
+    EXPECT_TRUE(cpu.PS.V);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP_ResultZero_Bit6and7areMixed) {
     //Given:
     using namespace m6502;
+    cpu.PS.N = true;
+    cpu.PS.V = false;
     ExpectedCycles = 3;
-    // cpu.A = 0x33;
     mem.Data[0xFFFC] = CPU::INS_BIT_ZP;
     mem.Data[0xFFFD] = 0x42;
     mem.Data[0x0042] = 0b10000000;
@@ -751,18 +747,14 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ZP_ResultZero_Bit6and7areMixed) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
-    // EXPECT_EQ(cpu.A, 0x33);
-    // EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_FALSE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
-    // EXPECT_EQ(cycles, ExpectedCycles);
+    EXPECT_FALSE(cpu.PS.V);
+    EXPECT_TRUE(cpu.PS.N);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS) {
     //Given:
     using namespace m6502;
     ExpectedCycles = 4;
+    cpu.PS.N = cpu.PS.V = false;
     cpu.A = 0xCC;
     mem.Data[0xFFFC] = CPU::INS_BIT_ABS;
     mem.Data[0xFFFD] = 0x00;
@@ -774,17 +766,16 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
     EXPECT_EQ(cpu.A, 0xCC);
-    EXPECT_FALSE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_TRUE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    EXPECT_FALSE(cpu.PS.Z);
+    EXPECT_TRUE(cpu.PS.N);
+    EXPECT_TRUE(cpu.PS.V);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS_ResultZero) {
     //Given:
     using namespace m6502;
+    cpu.PS.N = cpu.PS.V = true;
     ExpectedCycles = 4;
     cpu.A = 0xCC;
     mem.Data[0xFFFC] = CPU::INS_BIT_ABS;
@@ -797,17 +788,16 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS_ResultZero) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
     EXPECT_EQ(cpu.A, 0xCC);
-    EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_FALSE(cpu.PSF.N);
-    EXPECT_FALSE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    EXPECT_TRUE(cpu.PS.Z);
+    EXPECT_FALSE(cpu.PS.N);
+    EXPECT_FALSE(cpu.PS.V);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS_ResultZero_Bit6and7areZero) {
     //Given:
     using namespace m6502;
+    cpu.PS.N = cpu.PS.V = false;
     ExpectedCycles = 4;
     cpu.A = 0x33;
     mem.Data[0xFFFC] = CPU::INS_BIT_ABS;
@@ -820,17 +810,17 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS_ResultZero_Bit6and7areZero) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
     EXPECT_EQ(cpu.A, 0x33);
-    EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_TRUE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    EXPECT_TRUE(cpu.PS.Z);
+    EXPECT_TRUE(cpu.PS.N);
+    EXPECT_TRUE(cpu.PS.V);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS_ResultZero_Bit6and7areMixed) {
     //Given:
     using namespace m6502;
+    cpu.PS.V = true;
+    cpu.PS.N = false;
     ExpectedCycles = 4;
     // cpu.A = 0x33;
     mem.Data[0xFFFC] = CPU::INS_BIT_ABS;
@@ -843,11 +833,6 @@ TEST_F(M6502LogicalAndEorOraBitTests, INS_BIT_ABS_ResultZero_Bit6and7areMixed) {
     cycles = cpu.Execute(ExpectedCycles, mem);
 
     //Then:
-    // EXPECT_EQ(cpu.A, 0x37);
-    // EXPECT_EQ(cpu.A, 0x33);
-    // EXPECT_TRUE(cpu.PSF.Z);
-    EXPECT_TRUE(cpu.PSF.N);
-    EXPECT_FALSE(cpu.PSF.V);
-    // VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
-    // EXPECT_EQ(cycles, ExpectedCycles);
+    EXPECT_TRUE(cpu.PS.N);
+    EXPECT_FALSE(cpu.PS.V);
 }

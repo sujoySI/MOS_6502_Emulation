@@ -25,13 +25,13 @@ class M6502StoreRegisterTests : public ::testing::Test {
 };
 
 static void VerifyUnmodifiedFlagsFromStoreRegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
-    EXPECT_EQ(cpu.PSF.B, cpuCopy.PSF.B);
-    EXPECT_EQ(cpu.PSF.C, cpuCopy.PSF.C);
-    EXPECT_EQ(cpu.PSF.D, cpuCopy.PSF.D);
-    EXPECT_EQ(cpu.PSF.I, cpuCopy.PSF.I);
-    EXPECT_EQ(cpu.PSF.V, cpuCopy.PSF.V);
-    EXPECT_EQ(cpu.PSF.Z, cpuCopy.PSF.Z);
-    EXPECT_EQ(cpu.PSF.N, cpuCopy.PSF.N);
+    EXPECT_EQ(cpu.PS.B, cpuCopy.PS.B);
+    EXPECT_EQ(cpu.PS.C, cpuCopy.PS.C);
+    EXPECT_EQ(cpu.PS.D, cpuCopy.PS.D);
+    EXPECT_EQ(cpu.PS.I, cpuCopy.PS.I);
+    EXPECT_EQ(cpu.PS.V, cpuCopy.PS.V);
+    EXPECT_EQ(cpu.PS.Z, cpuCopy.PS.Z);
+    EXPECT_EQ(cpu.PS.N, cpuCopy.PS.N);
 }
 
 void M6502StoreRegisterTests::TestStoreRegisterZeroPage(const m6502::UI8 OpcodeToTest,  m6502::UI8 m6502::CPU::*RegisterToTest) {
