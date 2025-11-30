@@ -17,7 +17,7 @@ jmp start
 static m6502::UI8 TestPrg[] = {
     0x00, 0x10, 0xA9, 0xFF, 0x85, 0x90, 0x8D,
     0x00, 0x80, 0x49, 0xCC, 0x4C, 0x02, 0x10 };
-static constexpr m6502::SI32 NumBytesInPrg = 14;
+static constexpr m6502::SI32 NumBytesInPrg = sizeof(TestPrg);
 
 class M6502LoadPrgTests : public ::testing::Test {
     public:
@@ -68,6 +68,6 @@ TEST_F(M6502LoadPrgTests, TestLoadProgramAndExecuteIt) {
     // std::cout<<"\n";
     for (SI32 clock = 1000; clock > 0;) {
         clock -= cpu.Execute(1, mem);
-        cpu.PrintStatusHex();
+        // cpu.PrintStatusHex();
     }
 }

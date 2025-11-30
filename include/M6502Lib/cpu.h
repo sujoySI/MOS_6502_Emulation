@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <iostream>
+#include <iomanip>
 
 namespace m6502 {
     using UI8 = uint8_t;
@@ -93,6 +94,7 @@ struct m6502::CPU {
 
     //OPCODES
     static constexpr UI8
+    //Load one register from Memory
     //LDA aka LoaD A register
     INS_LDA_IM = 0xA9,
     INS_LDA_ZP = 0xA5,
@@ -115,6 +117,7 @@ struct m6502::CPU {
     INS_LDY_ABS = 0xAC,
     INS_LDY_ABSX = 0xBC,
 
+    //Store one Register to Memory
     //STA aka STore A register
     INS_STA_ZP = 0x85,
     INS_STA_ZPX = 0x95,
@@ -132,7 +135,28 @@ struct m6502::CPU {
     INS_STY_ZPX = 0x94,
     INS_STY_ABS = 0x8C,
 
-    //AND
+    //Increment and Decrement
+    //INC aka INCrement data in memory
+    INS_INC_ZP = 0xE6,
+    INS_INC_ZPX = 0xF6,
+    INS_INC_ABS = 0xEE,
+    INS_INC_ABSX = 0xFE,
+    //INX aka INcrement X register
+    INS_INX = 0xE8,
+    //INY aka INcrement Y register
+    INS_INY = 0xC8,
+    //DEC aka DECrement data in memory
+    INS_DEC_ZP = 0xC6,
+    INS_DEC_ZPX = 0xD6,
+    INS_DEC_ABS = 0xCE,
+    INS_DEC_ABSX = 0xDE,
+    //DEX aka DEcrement X register
+    INS_DEX = 0xCA,
+    //DEY aka DEcrement Y register
+    INS_DEY = 0x88,
+
+    //Logic Instruction
+    //AND aka And
     INS_AND_IM = 0x29,
     INS_AND_ZP = 0x22,
     INS_AND_ZPX = 0x35,
@@ -163,6 +187,17 @@ struct m6502::CPU {
     INS_BIT_ZP = 0x24,
     INS_BIT_ABS = 0x2C,
 
+    //Trasnfer Register to another
+    //TAX aka Tranfer A to X
+    INS_TAX = 0xAA,
+    //TAY aka Tranfer A to Y
+    INS_TAY = 0xA8,
+    //TXA aka Tranfer X to A
+    INS_TXA = 0x8A,
+    //TYA aka Tranfer Y to A
+    INS_TYA = 0x98,
+
+    //Stack Operatrions
     //TSX aka Transfer SP to X
     INS_TSX = 0xBA,
     //TSX aka Transfer X to SP
@@ -176,6 +211,7 @@ struct m6502::CPU {
     //PLP aka PulL from stack to PS
     INS_PLP = 0x28,
 
+    //Jump and Calls
     //JMP aka JuMP to an instruction
     INS_JMP_ABS = 0x4C,
     INS_JMP_IND = 0x6C,
@@ -185,9 +221,9 @@ struct m6502::CPU {
     INS_RTS = 0x60;
 
     //Status
-    void LoadRegistersSetStatus(UI8 Register);
+    void SetZeroAndNegativeFlag(UI8 Register);
 
-    UI16 LoadPrg(const UI8* Program, SI32 Numbytes, MEMORY &memory);
+    static UI16 LoadPrg(const UI8* Program, SI32 Numbytes, MEMORY &memory);
 
     void PrintStatus() const;
     void PrintStatusHex() const;

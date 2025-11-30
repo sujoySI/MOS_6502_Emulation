@@ -27,7 +27,7 @@ class M6502LoadRegisterTests : public ::testing::Test {
         void TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundary(m6502::UI8 OpcodeToTest, m6502::UI8 m6502::CPU::*RegisterToTest, m6502::UI8 m6502::CPU::*RegisterToLoadFrom);
 };
 
-static void VerifyUnmodifiedFlagsFromLogicalOpOnARegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
+static void VerifyUnmodifiedFlagsFromLoadRegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
     EXPECT_EQ(cpu.PS.B, cpuCopy.PS.B);
     EXPECT_EQ(cpu.PS.C, cpuCopy.PS.C);
     EXPECT_EQ(cpu.PS.D, cpuCopy.PS.D);
@@ -51,7 +51,7 @@ void M6502LoadRegisterTests::TestLoadRegisterImmediate(const m6502::UI8 OpcodeTo
     EXPECT_EQ(cpu.*RegisterToTest, 0x84);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_TRUE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -71,7 +71,7 @@ void M6502LoadRegisterTests::TestLoadRegisterImmediateAffectsZeroFlag(const m650
     //Then:
     EXPECT_TRUE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
 }
 
 void M6502LoadRegisterTests::TestLoadRegisterZeroPage(const m6502::UI8 OpcodeToTest, m6502::UI8 m6502::CPU::*RegisterToTest){
@@ -90,7 +90,7 @@ void M6502LoadRegisterTests::TestLoadRegisterZeroPage(const m6502::UI8 OpcodeToT
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -111,7 +111,7 @@ void M6502LoadRegisterTests::TestLoadRegisterZeroPageXorY(const m6502::UI8 Opcod
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -131,7 +131,7 @@ void M6502LoadRegisterTests::TestLoadRegisterZeroPageXorYWhenItWraps(const m6502
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -155,7 +155,7 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsolute(const m6502::UI8 OpcodeToT
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -179,7 +179,7 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorY(const m6502::UI8 Opcod
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -202,7 +202,7 @@ void M6502LoadRegisterTests::TestLoadRegisterAbsoluteXorYWhenCrossingPageBoundar
     EXPECT_EQ(cpu.*RegisterToTest, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -304,7 +304,7 @@ TEST_F(M6502LoadRegisterTests, INS_LDA_INDX) {
     EXPECT_EQ(cpu.A, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -328,7 +328,7 @@ TEST_F(M6502LoadRegisterTests, INS_LDA_INDY) {
     EXPECT_EQ(cpu.A, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
@@ -352,7 +352,7 @@ TEST_F(M6502LoadRegisterTests, INS_LDA_INDY_WhenItCrossesAPageBoundary) {
     EXPECT_EQ(cpu.A, 0x37);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromLogicalOpOnARegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromLoadRegister(cpu, cpuCopy);
     EXPECT_EQ(cycles, ExpectedCycles);
 }
 
