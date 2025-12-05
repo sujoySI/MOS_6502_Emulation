@@ -7,6 +7,8 @@ namespace m6502 {
     using UI8 = uint8_t;
     using UI16 = uint16_t;
     using UI32 = uint32_t;
+    using SI8 = int8_t;
+    using SI16 = int16_t;
     using SI32 = int32_t;
 
     union FLAG;
@@ -49,6 +51,7 @@ struct m6502::CPU {
     static UI8 ReadUI8(SI32 &cycles, UI16 address, const MEMORY &memory);
     static UI16 ReadUI16(SI32 &cycles, UI16 address, const MEMORY &memory);
     UI8 FetchUI8(SI32 &cycles, const MEMORY &memory);
+    SI8 FetchSI8(SI32 &cycles, const MEMORY &memory);
     UI16 FetchUI16(SI32 &cycles, const MEMORY &memory);
     static void WriteUI8(UI8 value ,SI32 &cycles, UI16 address, MEMORY &memory);
     static void WriteUI16(UI16 value, SI32 &cycles, UI16 address, MEMORY &memory);
@@ -95,7 +98,6 @@ struct m6502::CPU {
     //OPCODES
     static constexpr UI8
     //Load one register from Memory
-    //LDA aka LoaD A register
     INS_LDA_IM = 0xA9,
     INS_LDA_ZP = 0xA5,
     INS_LDA_ZPX = 0xB5,
@@ -104,13 +106,11 @@ struct m6502::CPU {
     INS_LDA_ABSY = 0xB9,
     INS_LDA_INDX = 0xA1,
     INS_LDA_INDY = 0xB1,
-    //LDX aka LoaD X register
     INS_LDX_IM = 0xA2,
     INS_LDX_ZP = 0xA6,
     INS_LDX_ZPY = 0xB6,
     INS_LDX_ABS = 0xAE,
     INS_LDX_ABSY = 0xBE,
-    //LDY aka LoaD Y register
     INS_LDY_IM = 0xA0,
     INS_LDY_ZP = 0xA4,
     INS_LDY_ZPX = 0xB4,
@@ -118,7 +118,6 @@ struct m6502::CPU {
     INS_LDY_ABSX = 0xBC,
 
     //Store one Register to Memory
-    //STA aka STore A register
     INS_STA_ZP = 0x85,
     INS_STA_ZPX = 0x95,
     INS_STA_ABS = 0x8D,
@@ -126,37 +125,28 @@ struct m6502::CPU {
     INS_STA_ABSY = 0x99,
     INS_STA_INDX = 0x81,
     INS_STA_INDY = 0x91,
-    //STX aka STore X register
     INS_STX_ZP = 0x86,
     INS_STX_ZPY = 0x96,
     INS_STX_ABS = 0x8E,
-    //STY aka STore Y register
     INS_STY_ZP = 0x84,
     INS_STY_ZPX = 0x94,
     INS_STY_ABS = 0x8C,
 
     //Increment and Decrement
-    //INC aka INCrement data in memory
     INS_INC_ZP = 0xE6,
     INS_INC_ZPX = 0xF6,
     INS_INC_ABS = 0xEE,
     INS_INC_ABSX = 0xFE,
-    //INX aka INcrement X register
     INS_INX = 0xE8,
-    //INY aka INcrement Y register
     INS_INY = 0xC8,
-    //DEC aka DECrement data in memory
     INS_DEC_ZP = 0xC6,
     INS_DEC_ZPX = 0xD6,
     INS_DEC_ABS = 0xCE,
     INS_DEC_ABSX = 0xDE,
-    //DEX aka DEcrement X register
     INS_DEX = 0xCA,
-    //DEY aka DEcrement Y register
     INS_DEY = 0x88,
 
     //Logic Instruction
-    //AND aka And
     INS_AND_IM = 0x29,
     INS_AND_ZP = 0x22,
     INS_AND_ZPX = 0x35,
@@ -165,7 +155,6 @@ struct m6502::CPU {
     INS_AND_ABSY = 0x39,
     INS_AND_INDX = 0x21,
     INS_AND_INDY = 0x31,
-    //EOR aka Exclusive OR
     INS_EOR_IM = 0x49,
     INS_EOR_ZP = 0x45,
     INS_EOR_ZPX = 0x55,
@@ -174,7 +163,6 @@ struct m6502::CPU {
     INS_EOR_ABSY = 0x59,
     INS_EOR_INDX = 0x41,
     INS_EOR_INDY = 0x51,
-    //ORA aka OR
     INS_ORA_IM = 0x09,
     INS_ORA_ZP = 0x05,
     INS_ORA_ZPX = 0x15,
@@ -183,41 +171,37 @@ struct m6502::CPU {
     INS_ORA_ABSY = 0x19,
     INS_ORA_INDX = 0x01,
     INS_ORA_INDY = 0x11,
-    //BIT
     INS_BIT_ZP = 0x24,
     INS_BIT_ABS = 0x2C,
 
+    //Branch Instructions
+    INS_BCC = 0x90,
+    INS_BCS = 0xB0,
+    INS_BEQ = 0xF0,
+    INS_BMI = 0x30,
+    INS_BNE = 0xD0,
+    INS_BPL = 0x10,
+    INS_BVC = 0x50,
+    INS_BVS = 0x70,
+
     //Trasnfer Register to another
-    //TAX aka Tranfer A to X
     INS_TAX = 0xAA,
-    //TAY aka Tranfer A to Y
     INS_TAY = 0xA8,
-    //TXA aka Tranfer X to A
     INS_TXA = 0x8A,
-    //TYA aka Tranfer Y to A
     INS_TYA = 0x98,
 
     //Stack Operatrions
-    //TSX aka Transfer SP to X
     INS_TSX = 0xBA,
-    //TSX aka Transfer X to SP
     INS_TXS = 0x9A,
-    //PHA aka PusH A to stack
     INS_PHA = 0x48,
-    //PLA aka PulL from stack to A
     INS_PLA = 0x68,
-    //PHP aka PusH PS to stack
     INS_PHP = 0x08,
-    //PLP aka PulL from stack to PS
     INS_PLP = 0x28,
 
     //Jump and Calls
-    //JMP aka JuMP to an instruction
     INS_JMP_ABS = 0x4C,
     INS_JMP_IND = 0x6C,
-    //JSR aka Jump Sub-Routine
     INS_JSR = 0x20,
-    //RTS aka Return To Subroutine
     INS_RTS = 0x60;
 
     //Status

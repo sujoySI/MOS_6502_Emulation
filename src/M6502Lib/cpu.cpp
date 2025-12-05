@@ -22,7 +22,7 @@ m6502::UI8 m6502::CPU::ReadUI8(SI32 &cycles, const UI16 address, const MEMORY &m
 m6502::UI16 m6502::CPU::ReadUI16(SI32 &cycles, const UI16 address, const MEMORY &memory) {
     const UI8 LoByte = ReadUI8(cycles, address, memory);
     const UI8 HiByte = ReadUI8(cycles, address + 1, memory);
-    UI16 value = LoByte | (HiByte << 8);
+    const UI16 value = LoByte | (HiByte << 8);
     return value;
 }
 
@@ -42,6 +42,10 @@ m6502::UI8 m6502::CPU::FetchUI8(SI32 &cycles, const MEMORY &memory) {
     ++PC;
     --cycles;
     return Datas;
+}
+
+m6502::SI8 m6502::CPU::FetchSI8(SI32 &cycles, const MEMORY &memory) {
+    return  static_cast<SI8> (FetchUI8(cycles, memory));
 }
 
 m6502::UI16 m6502::CPU::FetchUI16(SI32 &cycles, const MEMORY &memory) {
@@ -149,10 +153,10 @@ m6502::UI16 m6502::CPU::LoadPrg(const UI8 *Program, const SI32 Numbytes, MEMORY 
     UI16 LoadAddress = 0;
     if (Program && Numbytes > 2) {
         SI32 At = 0;
-        UI16 Lo = Program[At++];
-        UI16 Hi = (Program[At++] << 8);
+        const UI16 Lo = Program[At++];
+        const UI16 Hi = (Program[At++] << 8);
         LoadAddress = Lo | Hi;
-        UI16 Compare = LoadAddress+Numbytes-2;
+        const UI16 Compare = LoadAddress+Numbytes-2;
         for (SI32 i = LoadAddress; i < Compare; ++i) {
             memory.Data[i] = Program[At++];
         }
@@ -189,6 +193,21 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
     auto OraOp = [&cycles, &memory, this] (const UI16 Address){
         A |= ReadUI8(cycles, Address, memory);
         SetZeroAndNegativeFlag(A);
+    };
+
+    auto BranchIf = [&cycles, &memory, this] (const bool Test, const bool Expected) {
+        const SI8 Offset = FetchSI8(cycles, memory);
+        if (Test == Expected ) {
+            const UI16 OldPC = PC;
+            PC += Offset;
+            --cycles;
+
+            // ReSharper disable once CppTooWideScope
+            const bool PageChanged = (PC >> 8) != (OldPC >> 8);
+            if (PageChanged) {
+                cycles -= 2;
+            }
+        }
     };
 
     const SI32 CyclesRequested = cycles;
@@ -671,6 +690,40 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 PS.Z = !(A & Value);
                 PS.N = (Value & NegativeFLagBit) !=0;
                 PS.V = (Value & OverFlowFLagBit) !=0;
+            }break;
+
+            //Branches
+            case INS_BCC: //Branch if Carry Flag Not Set
+            {
+                BranchIf( PS.C, false );
+            }break;
+            case INS_BCS: //Branch if Carry Flag is Set
+            {
+                BranchIf( PS.C, true );
+            }break;
+            case INS_BEQ: //Branch on Equal if Zero Flag is Set
+            {
+                BranchIf( PS.Z, true );
+            }break;
+            case INS_BNE: //Branch on Not Equal if Zero Flag is Set
+            {
+                BranchIf( PS.Z, false );
+            }break;
+            case INS_BMI: //Branch on Minus if Negative Flag is Set
+            {
+                BranchIf( PS.N, true );
+            }break;
+            case INS_BPL: //Branch on Positive if Negative Flag not Set
+            {
+                BranchIf( PS.N, false );
+            }break;
+            case INS_BVS: //Branch if Overflow Flag is Set
+            {
+                BranchIf( PS.V, true );
+            }break;
+            case INS_BVC: //Branch if Overflow Flag not Set
+            {
+                BranchIf( PS.V, false );
             }break;
 
             /*  Note:

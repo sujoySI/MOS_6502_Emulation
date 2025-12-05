@@ -19,7 +19,7 @@ public:
     }
 };
 
-static void VerifyUnmodifiedFlagsFromTransferRegister(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
+static void VerifyUnmodifiedFlagsFromBranch(const m6502::CPU& cpu, const m6502::CPU& cpuCopy) {
     EXPECT_EQ(cpu.PS.B, cpuCopy.PS.B);
     EXPECT_EQ(cpu.PS.C, cpuCopy.PS.C);
     EXPECT_EQ(cpu.PS.D, cpuCopy.PS.D);
@@ -50,7 +50,7 @@ TEST_F(M6502TransferRegisterTest, INS_TAX_NotNegativeAndNotZero)
     EXPECT_EQ(cpu.X, 0x42);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TAX_NotNegativeAndZero)
 {
@@ -74,7 +74,7 @@ TEST_F(M6502TransferRegisterTest, INS_TAX_NotNegativeAndZero)
     EXPECT_EQ(cpu.X, 0x00);
     EXPECT_TRUE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TAX_Negative)
 {
@@ -98,7 +98,7 @@ TEST_F(M6502TransferRegisterTest, INS_TAX_Negative)
     EXPECT_EQ(cpu.X, 0b10001011);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_TRUE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 //TAY
 TEST_F(M6502TransferRegisterTest, INS_TAY_NotNegativeAndNotZero)
@@ -123,7 +123,7 @@ TEST_F(M6502TransferRegisterTest, INS_TAY_NotNegativeAndNotZero)
     EXPECT_EQ(cpu.Y, 0x42);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TAY_NotNegativeAndZero)
 {
@@ -147,7 +147,7 @@ TEST_F(M6502TransferRegisterTest, INS_TAY_NotNegativeAndZero)
     EXPECT_EQ(cpu.Y, 0x00);
     EXPECT_TRUE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TAY_Negative)
 {
@@ -171,7 +171,7 @@ TEST_F(M6502TransferRegisterTest, INS_TAY_Negative)
     EXPECT_EQ(cpu.Y, 0b10001011);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_TRUE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 //TXA
 TEST_F(M6502TransferRegisterTest, INS_TXA_NotNegativeAndNotZero)
@@ -196,7 +196,7 @@ TEST_F(M6502TransferRegisterTest, INS_TXA_NotNegativeAndNotZero)
     EXPECT_EQ(cpu.X, 0x42);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TXA_NotNegativeAndZero)
 {
@@ -220,7 +220,7 @@ TEST_F(M6502TransferRegisterTest, INS_TXA_NotNegativeAndZero)
     EXPECT_EQ(cpu.X, 0x00);
     EXPECT_TRUE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TXA_Negative)
 {
@@ -244,7 +244,7 @@ TEST_F(M6502TransferRegisterTest, INS_TXA_Negative)
     EXPECT_EQ(cpu.X, 0b10001011);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_TRUE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 //TAY
 TEST_F(M6502TransferRegisterTest, INS_TYA_NotNegativeAndNotZero)
@@ -269,7 +269,7 @@ TEST_F(M6502TransferRegisterTest, INS_TYA_NotNegativeAndNotZero)
     EXPECT_EQ(cpu.A, 0x42);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TYA_NotNegativeAndZero)
 {
@@ -293,7 +293,7 @@ TEST_F(M6502TransferRegisterTest, INS_TYA_NotNegativeAndZero)
     EXPECT_EQ(cpu.Y, 0x00);
     EXPECT_TRUE(cpu.PS.Z);
     EXPECT_FALSE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
 TEST_F(M6502TransferRegisterTest, INS_TYA_Negative)
 {
@@ -317,5 +317,5 @@ TEST_F(M6502TransferRegisterTest, INS_TYA_Negative)
     EXPECT_EQ(cpu.Y, 0b10001011);
     EXPECT_FALSE(cpu.PS.Z);
     EXPECT_TRUE(cpu.PS.N);
-    VerifyUnmodifiedFlagsFromTransferRegister(cpu, cpuCopy);
+    VerifyUnmodifiedFlagsFromBranch(cpu, cpuCopy);
 }
