@@ -1,10 +1,11 @@
 #include "M6502Lib/cpu.h"
 #include <cstring>
 
+#define ASSERT(Condition, Text) { if ( !Condition ) { throw -1; } }
+
 void m6502::MEMORY::Initialise() {
     memset(Data, 0x00, MAX_MEM * sizeof(Data[0]));
 }
-
 void m6502::CPU::Reset(const UI16 ResetVector, MEMORY &memory) {
     PC = ResetVector;
     SP = 0xFF;
@@ -18,36 +19,30 @@ m6502::UI8 m6502::CPU::ReadUI8(SI32 &cycles, const UI16 address, const MEMORY &m
     --cycles;
     return Datas;
 }
-
 m6502::UI16 m6502::CPU::ReadUI16(SI32 &cycles, const UI16 address, const MEMORY &memory) {
     const UI8 LoByte = ReadUI8(cycles, address, memory);
     const UI8 HiByte = ReadUI8(cycles, address + 1, memory);
     const UI16 value = LoByte | (HiByte << 8);
     return value;
 }
-
 void m6502::CPU::WriteUI8(const UI8 value ,SI32 &cycles, const UI16 address, MEMORY &memory) {
     memory.Data[address] = value;
     --cycles;
 }
-
 void m6502::CPU::WriteUI16( const UI16 value, SI32 &cycles, const UI16 address, MEMORY &memory) {
     memory.Data[address] = value & 0xFF;
     memory.Data[address + 1] = (value >> 8);
     cycles -= 2;
 }
-
 m6502::UI8 m6502::CPU::FetchUI8(SI32 &cycles, const MEMORY &memory) {
     const UI8 Datas = memory.Data[PC];
     ++PC;
     --cycles;
     return Datas;
 }
-
 m6502::SI8 m6502::CPU::FetchSI8(SI32 &cycles, const MEMORY &memory) {
     return  static_cast<SI8> (FetchUI8(cycles, memory));
 }
-
 m6502::UI16 m6502::CPU::FetchUI16(SI32 &cycles, const MEMORY &memory) {
     //6502 is Little Endian
     UI16 Datas = memory.Data[PC];
@@ -57,8 +52,6 @@ m6502::UI16 m6502::CPU::FetchUI16(SI32 &cycles, const MEMORY &memory) {
     cycles -= 2;
     return Datas;
 }
-
-
 
 m6502::UI16 m6502::CPU::AddrZeroPage(SI32 &cycles, const MEMORY &memory) {
     const UI8 ZeroPageAddr = FetchUI8(cycles, memory);
@@ -70,19 +63,16 @@ m6502::UI16 m6502::CPU::AddrZeroPageX(SI32 &cycles, const MEMORY &memory) {
     --cycles;
     return ZeroPageAddr;
 }
-
 m6502::UI16 m6502::CPU::AddrZeroPageY(SI32 &cycles, const MEMORY &memory) {
     UI8 ZeroPageAddr = FetchUI8(cycles, memory);
     ZeroPageAddr += Y;
     --cycles;
     return ZeroPageAddr;
 }
-
 m6502::UI16 m6502::CPU::AddrAbsolute(SI32 &cycles, const MEMORY &memory) {
     const UI16 AbsAddress = FetchUI16(cycles, memory);
     return AbsAddress;
 }
-
 m6502::UI16 m6502::CPU::AddrAbsoluteX(SI32 &cycles, const MEMORY &memory) {
     const UI16 AbsAddress = FetchUI16(cycles, memory);
     const UI16 AbsAddressX = AbsAddress + X;
@@ -91,7 +81,6 @@ m6502::UI16 m6502::CPU::AddrAbsoluteX(SI32 &cycles, const MEMORY &memory) {
     }
     return AbsAddressX;
 }
-
 m6502::UI16 m6502::CPU::AddrAbsoluteY(SI32 &cycles, const MEMORY &memory) {
     const UI16 AbsAddress = FetchUI16(cycles, memory);
     const UI16 AbsAddressY = AbsAddress + Y;
@@ -100,23 +89,20 @@ m6502::UI16 m6502::CPU::AddrAbsoluteY(SI32 &cycles, const MEMORY &memory) {
     }
     return AbsAddressY;
 }
-
-//Takes 5 cycles always
-m6502::UI16 m6502::CPU::AddrAbsoluteX_5(SI32 &cycles, const MEMORY &memory) {
+m6502::UI16 m6502::CPU::AddrAbsoluteX_5(SI32 &cycles, const MEMORY &memory) //Takes 5 cycles always
+{
     const UI16 AbsAddress = FetchUI16(cycles, memory);
     const UI16 AbsAddressX = AbsAddress + X;
     --cycles;
     return AbsAddressX;
 }
-
-//Takes 6 cycles always
-m6502::UI16 m6502::CPU::AddrAbsoluteY_6(SI32 &cycles, const MEMORY &memory) {
+m6502::UI16 m6502::CPU::AddrAbsoluteY_6(SI32 &cycles, const MEMORY &memory) //Takes 6 cycles always
+{
     const UI16 AbsAddress = FetchUI16(cycles, memory);
     const UI16 AbsAddressY = AbsAddress + Y;
     --cycles;
     return AbsAddressY;
 }
-
 m6502::UI16 m6502::CPU::AddrIndirectX(SI32 &cycles, const MEMORY &memory) {
     UI8 ZpAddress = FetchUI8(cycles, memory);
     ZpAddress += X;
@@ -124,7 +110,6 @@ m6502::UI16 m6502::CPU::AddrIndirectX(SI32 &cycles, const MEMORY &memory) {
     const UI16 EffectiveAddress = ReadUI16(cycles, ZpAddress,memory);
     return EffectiveAddress;
 }
-
 m6502::UI16 m6502::CPU::AddrIndirectY(SI32 &cycles, const MEMORY &memory) {
     const UI8 ZpAddress = FetchUI8(cycles, memory);
     const UI16 EffectiveAddress = ReadUI16(cycles, ZpAddress,memory);
@@ -134,19 +119,13 @@ m6502::UI16 m6502::CPU::AddrIndirectY(SI32 &cycles, const MEMORY &memory) {
     }
     return EffectiveAddressY;
 }
-
-//Takes 6 cycles always
-m6502::UI16 m6502::CPU::AddrIndirectY_6(SI32 &cycles, const MEMORY &memory) {
+m6502::UI16 m6502::CPU::AddrIndirectY_6(SI32 &cycles, const MEMORY &memory) //Takes 6 cycles always
+{
     const UI8 ZpAddress = FetchUI8(cycles, memory);
     const UI16 EffectiveAddress = ReadUI16(cycles, ZpAddress,memory);
     const UI16 EffectiveAddressY = EffectiveAddress + Y;
     --cycles;
     return EffectiveAddressY;
-}
-
-void m6502::CPU::SetZeroAndNegativeFlag(const UI8 Register) {
-    PS.Z = (Register == 0);
-    PS.N = (Register & 0b10000000) > 0;
 }
 
 m6502::UI16 m6502::CPU::LoadPrg(const UI8 *Program, const SI32 Numbytes, MEMORY &memory) {
@@ -163,25 +142,27 @@ m6502::UI16 m6502::CPU::LoadPrg(const UI8 *Program, const SI32 Numbytes, MEMORY 
     }
     return LoadAddress;
 }
-
 void m6502::CPU::PrintStatus() const {
     std::cout<<std::dec<<"A:"<<static_cast<int>(A)<<" X:"<<static_cast<int>(X)<<" Y:"<<static_cast<int>(Y)<<"\n";
     std::cout<<std::dec<<"PC:"<<static_cast<int>(PC)<<" SP:"<<static_cast<int>(SP)<<"\n";
     std::cout<<std::dec<<"PS:"<<static_cast<int>(PS.All)<<"\n\n";
 }
-
 void m6502::CPU::PrintStatusHex() const {
     std::cout<<std::hex<<"A:0x"<<static_cast<int>(A)<<" X:0x"<<static_cast<int>(X)<<" Y:0x"<<static_cast<int>(Y)<<" ";
     std::cout<<std::hex<<"PC:0x"<<static_cast<int>(PC)<<" SP:0x"<<static_cast<int>(SP)<<" ";
     std::cout<<std::hex<<"PS:0x"<<static_cast<int>(PS.All)<<"\n";
 }
+void m6502::CPU::SetZeroAndNegativeFlag(const UI8 Register) {
+    PS.Z = (Register == 0);
+    PS.N = (Register & 0b10000000) > 0;
+}
 
-m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
+m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory)
+{
     auto LoadRegister = [&cycles, &memory, this] (const UI16 Address, UI8& Register){
         Register = ReadUI8(cycles, Address, memory);
         SetZeroAndNegativeFlag(Register);
     };
-
     auto AndOp = [&cycles, &memory, this] (const UI16 Address){
         A &= ReadUI8(cycles, Address, memory);
         SetZeroAndNegativeFlag(A);
@@ -194,7 +175,6 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
         A |= ReadUI8(cycles, Address, memory);
         SetZeroAndNegativeFlag(A);
     };
-
     auto BranchIf = [&cycles, &memory, this] (const bool Test, const bool Expected) {
         const SI8 Offset = FetchSI8(cycles, memory);
         if (Test == Expected ) {
@@ -208,6 +188,17 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 cycles -= 2;
             }
         }
+    };
+    auto ADC = [&cycles, &memory, this] (const UI8 Operand) {
+        ASSERT( PS.D == false, "Haven't handled decimal mode" );
+        const bool AreSignBitsTheSame = !((A ^ Operand) & NegativeFLagBit);
+        UI16 Sum = A;
+        Sum += Operand;
+        Sum += PS.C;
+        A = (Sum & 0xFF);
+        SetZeroAndNegativeFlag(A);
+        PS.C = Sum > 0xFF;
+        PS.V = AreSignBitsTheSame && ((A ^ Operand) & NegativeFLagBit);
     };
 
     const SI32 CyclesRequested = cycles;
@@ -692,6 +683,55 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 PS.V = (Value & OverFlowFLagBit) !=0;
             }break;
 
+            //Arithmetic
+            case INS_ADC_IM: //Add with Carry ImediateMode
+            {
+                UI8 Operand = FetchUI8(cycles, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_ZP: //Add with Carry ZeroPageMode
+            {
+                UI16 Address = AddrZeroPage(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_ZPX: //Add with Carry ZeroPageXMode
+            {
+                UI16 Address = AddrZeroPageX(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_ABS: //Add with Carry AbsoluteMode
+            {
+                UI16 Address = AddrAbsolute(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_ABSX: //Add with Carry AbsoluteXMode
+            {
+                UI16 Address = AddrAbsoluteX(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_ABSY: //Add with Carry AbsoluteYMode
+            {
+                UI16 Address = AddrAbsoluteY(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_INDX: //Add with Carry IndexedIndirectXMode
+            {
+                UI16 Address = AddrIndirectX(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+            case INS_ADC_INDY: //Add with Carry IndexedIndirectYMode
+            {
+                UI16 Address = AddrIndirectY(cycles, memory);
+                UI8 Operand = ReadUI8(cycles, Address, memory);
+                ADC(Operand);
+            }break;
+
             //Branches
             case INS_BCC: //Branch if Carry Flag Not Set
             {
@@ -726,13 +766,63 @@ m6502::SI32 m6502::CPU::Execute(SI32 cycles, MEMORY &memory) {
                 BranchIf( PS.V, false );
             }break;
 
+            //Status Change Flags
+            case INS_CLC: //Clear Carry Flag
+            {
+                PS.C = false;
+                --cycles;
+            }break;
+            case INS_CLD: //Clear Decimal Flag
+            {
+                PS.D = false;
+                --cycles;
+            }break;
+            case INS_CLI: //Clear Interrupt Flag
+            {
+                PS.I = false;
+                --cycles;
+            }break;
+            case INS_CLV: //Clear OverFlow Flag
+            {
+                PS.V = false;
+                --cycles;
+            }break;
+            case INS_SEC: //Set Carry Flag
+            {
+                PS.C = true;
+                --cycles;
+            }break;
+            case INS_SED: //Set Decimal Flag
+            {
+                PS.D = true;
+                --cycles;
+            }break;
+            case INS_SEI: //Set Interrupt Flag
+            {
+                PS.I = true;
+                --cycles;
+            }break;
+
+            //System Functions
+            // case INS_BRK: //Breaks or Just Interrups a process
+            // {
+            //
+            // }break;
+            case INS_NOP: //Does No Oeration Only Consumes Cycle
+            {
+                --cycles;
+            }break;
+            // case INS_RTI: //Return to Interrupt
+            // {
+            //
+            // }break;
+
             /*  Note:
                 An original 6502 has does not correctly fetch the target address if the indirect vector falls on a page boundary
                 (e.g. $xxFF where xx is any value from $00 to $FF). In this case fetches the LSB from $xxFF as expected but takes
                 the MSB from $xx00. This is fixed in some later chips like the 65SC02 so for compatibility always ensure the indirect
                 vector is not at the end of the page.
             */
-
             //Jump And Calls
             case INS_JMP_ABS: //Jump to instruction Absolute mode
             {

@@ -4,10 +4,10 @@
 #include <iomanip>
 
 namespace m6502 {
-    using UI8 = uint8_t;
+    using UI8  = uint8_t;
     using UI16 = uint16_t;
     using UI32 = uint32_t;
-    using SI8 = int8_t;
+    using SI8  = int8_t;
     using SI16 = int16_t;
     using SI32 = int32_t;
 
@@ -174,6 +174,43 @@ struct m6502::CPU {
     INS_BIT_ZP = 0x24,
     INS_BIT_ABS = 0x2C,
 
+    //Arithmetic
+    //ADC
+    INS_ADC_IM = 0x69,
+    INS_ADC_ZP = 0x65,
+    INS_ADC_ZPX = 0x75,
+    INS_ADC_ABS = 0x6D,
+    INS_ADC_ABSX = 0x7D,
+    INS_ADC_ABSY = 0x79,
+    INS_ADC_INDX = 0x61,
+    INS_ADC_INDY = 0x71,
+    //SBC
+    INS_SBC_IM = 0xE9,
+    INS_SBC_ZP = 0xE5,
+    INS_SBC_ZPX = 0xF5,
+    INS_SBC_ABS = 0xED,
+    INS_SBC_ABSX = 0xFD,
+    INS_SBC_ABSY = 0xF9,
+    INS_SBC_INDX = 0xE1,
+    INS_SBC_INDY = 0xF1,
+    //CMP
+    INS_CMP_IM = 0xC9,
+    INS_CMP_ZP = 0xC5,
+    INS_CMP_ZPX = 0xD5,
+    INS_CMP_ABS = 0xCD,
+    INS_CMP_ABSX = 0xDD,
+    INS_CMP_ABSY = 0xD9,
+    INS_CMP_INDX = 0xC1,
+    INS_CMP_INDY = 0xD1,
+    //CPX
+    INS_CPX_IM = 0xE0,
+    INS_CPX_ZP = 0xE4,
+    INS_CPX_ABS = 0xEC,
+    //CPX
+    INS_CPY_IM = 0xC0,
+    INS_CPY_ZP = 0xC4,
+    INS_CPY_ABS = 0xCC,
+
     //Branch Instructions
     INS_BCC = 0x90,
     INS_BCS = 0xB0,
@@ -197,6 +234,20 @@ struct m6502::CPU {
     INS_PLA = 0x68,
     INS_PHP = 0x08,
     INS_PLP = 0x28,
+
+    //Status Flag Change
+    INS_CLC = 0x18,
+    INS_CLD = 0xD8,
+    INS_CLI = 0x58,
+    INS_CLV = 0xB8,
+    INS_SEC = 0x38,
+    INS_SED = 0xF8,
+    INS_SEI = 0x78,
+
+    //System Functions
+    INS_BRK = 0x00,
+    INS_NOP = 0xEA,
+    INS_RTI = 0x40,
 
     //Jump and Calls
     INS_JMP_ABS = 0x4C,
